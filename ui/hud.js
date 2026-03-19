@@ -10,6 +10,8 @@ import { isHighScore, saveHighScore } from '../systems/scores.js';
 import { isLoanSharkCity } from '../systems/bank.js';
 import { renderAIBot } from '../systems/aibot.js';
 import { checkAchievement } from '../systems/achievements.js';
+import { isInSession, submitScore as submitBoardScore } from '../systems/leaderboard.js';
+import { showToast } from './toast.js';
 
 let prevHudValues = {};
 
@@ -197,6 +199,32 @@ export function endGame(reason) {
         hsNotice.style.display = 'none';
         nameInput.style.display = 'none';
         saveBtn.style.display = 'none';
+    }
+
+    // Post to private board (if in a session)
+    let existingBoardBtn = document.getElementById('board-post-btn');
+    if (existingBoardBtn) existingBoardBtn.remove();
+    if (isInSession()) {
+        const boardBtn = document.createElement('button');
+        boardBtn.id = 'board-post-btn';
+        boardBtn.className = 'btn btn-primary btn-large';
+        boardBtn.textContent = 'POST TO BOARD';
+        boardBtn.style.marginTop = '0.5rem';
+        boardBtn.addEventListener('click', async () => {
+            const name = (nameInput.value.trim() || 'Anonymous').substring(0, 16);
+            boardBtn.disabled = true;
+            boardBtn.textContent = 'POSTING...';
+            try {
+                const result = await submitBoardScore(name, netWorth, state.difficulty, state.day);
+                boardBtn.textContent = `POSTED (#${result?.rank || '?'})`;
+                showToast(`Posted to board! Rank #${result?.rank || '?'}`, 'good');
+            } catch (e) {
+                boardBtn.textContent = 'FAILED';
+                showToast('Post failed: ' + e.message, 'bad');
+            }
+        });
+        const restartBtn = document.getElementById('restart-btn');
+        restartBtn.parentNode.insertBefore(boardBtn, restartBtn);
     }
 
     setTimeout(drawFinalNetworthChart, 100);

@@ -13,6 +13,7 @@ import { showScreen, showModal, closeModals } from './ui/screens.js';
 import { initMatrixRain, stopMatrixRain, startMatrixRain } from './ui/matrix.js';
 import { updateUI, endGame } from './ui/hud.js';
 import { openAssetDetail } from './ui/market.js';
+import { renderLeaderboardModal } from './systems/leaderboard.js';
 
 let selectedDifficulty = 'normal';
 
@@ -92,6 +93,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('scores-back-btn').addEventListener('click', () => showScreen('title-screen'));
     document.getElementById('achievements-btn').addEventListener('click', showAchievements);
     document.getElementById('achievements-back-btn').addEventListener('click', () => showScreen('title-screen'));
+    document.getElementById('leaderboard-btn')?.addEventListener('click', () => {
+        const container = document.getElementById('leaderboard-content');
+        if (container) renderLeaderboardModal(container, (msg, type) => {
+            import('./ui/toast.js').then(m => m.showToast(msg, type));
+        });
+        showModal('leaderboard-modal');
+    });
     document.getElementById('restart-btn').addEventListener('click', () => { checkForResume(); startMatrixRain(); showScreen('title-screen'); });
     document.getElementById('wipeout-restart-btn')?.addEventListener('click', () => { checkForResume(); startMatrixRain(); showScreen('title-screen'); });
 
