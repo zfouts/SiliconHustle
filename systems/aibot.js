@@ -2,6 +2,7 @@ import { ASSETS, CITIES } from '../data/constants.js';
 import { state, freeStorage } from './state.js';
 import { hasPerk } from './perks.js';
 import { isLoanSharkCity } from './bank.js';
+import { getTravelFare } from './travel.js';
 
 // The AI Trading Bot analyzes ALL markets and generates prioritized recommendations.
 // It sees global prices (like the player) but thinks in terms of optimal moves.
@@ -174,16 +175,19 @@ function generateRecommendations() {
             }
         }
 
-        // Suggest traveling to a better sell city if spread is significant
+        // Suggest traveling to a better sell city if spread is significant (net of airfare)
         if (bestSellCityIdx !== ci && bestSellPrice > localPrice * 1.15) {
-            const extraProfit = (bestSellPrice - localPrice) * owned;
-            recs.push({
-                type: 'travel',
-                action: `TRAVEL \u2192 ${bestSellCity}`,
-                detail: `Sell ${asset.icon} ${asset.name} there for $${bestSellPrice.toLocaleString()}/ea (+${((bestSellPrice / localPrice - 1) * 100).toFixed(0)}%)`,
-                profit: extraProfit,
-                score: extraProfit * 0.9, // slightly lower priority than immediate trades
-            });
+            const fare = getTravelFare(bestSellCityIdx);
+            const extraProfit = (bestSellPrice - localPrice) * owned - fare;
+            if (extraProfit > 0) {
+                recs.push({
+                    type: 'travel',
+                    action: `TRAVEL \u2192 ${bestSellCity}`,
+                    detail: `Sell ${asset.icon} ${asset.name} there for $${bestSellPrice.toLocaleString()}/ea (+${((bestSellPrice / localPrice - 1) * 100).toFixed(0)}%) | Fare: $${fare.toLocaleString()}`,
+                    profit: extraProfit,
+                    score: extraProfit * 0.9, // slightly lower priority than immediate trades
+                });
+            }
         }
     });
 

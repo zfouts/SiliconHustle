@@ -14,14 +14,14 @@ export const ASSETS = [
 ];
 
 export const CITIES = [
-    { id: 'sf',      name: 'San Francisco', vibe: 'VC money flows freely',       specialty: 'Cheap: Hardware | Pricey: Crypto, Software', priceMod: { crypto: 1.2, hardware: 0.9, software: 1.3 }},
-    { id: 'austin',  name: 'Austin',        vibe: 'Crypto bros paradise',         specialty: 'Cheap: Crypto | Pricey: Hardware, NFTs',     priceMod: { crypto: 0.8, hardware: 1.1, nft: 1.3 }},
-    { id: 'nyc',     name: 'New York',      vibe: 'Wall Street meets Web3',       specialty: 'Cheap: Services | Pricey: Data, Crypto',     priceMod: { data: 1.3, crypto: 1.1, service: 0.8 }},
-    { id: 'miami',   name: 'Miami',         vibe: 'Offshore vibes',               specialty: 'Cheap: Contraband | Pricey: NFTs',           priceMod: { crypto: 0.9, contraband: 0.7, nft: 1.2 }},
-    { id: 'seattle', name: 'Seattle',       vibe: 'Big tech backyard',            specialty: 'Cheap: Software, Hardware | Pricey: Data',    priceMod: { software: 0.7, hardware: 0.8, data: 1.1 }},
-    { id: 'berlin',  name: 'Berlin',        vibe: 'Underground hacker scene',     specialty: 'Cheap: Services, Contraband',                priceMod: { contraband: 0.8, service: 0.7, crypto: 0.9 }},
-    { id: 'tokyo',   name: 'Tokyo',         vibe: 'Cutting edge tech market',     specialty: 'Cheap: Hardware | Pricey: Digital, Software', priceMod: { hardware: 0.7, software: 1.1, digital: 1.3 }},
-    { id: 'lagos',   name: 'Lagos',         vibe: "Africa's booming tech hub",    specialty: 'Cheap: Data, Digital | Pricey: Services',     priceMod: { service: 1.3, data: 0.7, digital: 0.8 }},
+    { id: 'sf',      name: 'San Francisco', vibe: 'VC money flows freely',       specialty: 'Cheap: Hardware | Pricey: Crypto, Software', priceMod: { crypto: 1.2, hardware: 0.9, software: 1.3 }, coords: [37.77, -122.42] },
+    { id: 'austin',  name: 'Austin',        vibe: 'Crypto bros paradise',         specialty: 'Cheap: Crypto | Pricey: Hardware, NFTs',     priceMod: { crypto: 0.8, hardware: 1.1, nft: 1.3 },     coords: [30.27, -97.74] },
+    { id: 'nyc',     name: 'New York',      vibe: 'Wall Street meets Web3',       specialty: 'Cheap: Services | Pricey: Data, Crypto',     priceMod: { data: 1.3, crypto: 1.1, service: 0.8 },     coords: [40.71, -74.01] },
+    { id: 'miami',   name: 'Miami',         vibe: 'Offshore vibes',               specialty: 'Cheap: Contraband | Pricey: NFTs',           priceMod: { crypto: 0.9, contraband: 0.7, nft: 1.2 },   coords: [25.76, -80.19] },
+    { id: 'seattle', name: 'Seattle',       vibe: 'Big tech backyard',            specialty: 'Cheap: Software, Hardware | Pricey: Data',    priceMod: { software: 0.7, hardware: 0.8, data: 1.1 },   coords: [47.61, -122.33] },
+    { id: 'berlin',  name: 'Berlin',        vibe: 'Underground hacker scene',     specialty: 'Cheap: Services, Contraband',                priceMod: { contraband: 0.8, service: 0.7, crypto: 0.9 }, coords: [52.52, 13.40] },
+    { id: 'tokyo',   name: 'Tokyo',         vibe: 'Cutting edge tech market',     specialty: 'Cheap: Hardware | Pricey: Digital, Software', priceMod: { hardware: 0.7, software: 1.1, digital: 1.3 }, coords: [35.68, 139.69] },
+    { id: 'lagos',   name: 'Lagos',         vibe: "Africa's booming tech hub",    specialty: 'Cheap: Data, Digital | Pricey: Services',     priceMod: { service: 1.3, data: 0.7, digital: 0.8 },     coords: [6.52, 3.38] },
 ];
 
 export const EVENTS = [
@@ -96,9 +96,9 @@ export const EVENTS = [
 ];
 
 export const DIFFICULTY = {
-    easy:   { days: 40, cash: 5000, debt: 3000, interest: 0.05, label: 'EASY',   color: '#00e676' },
-    normal: { days: 30, cash: 2000, debt: 5500, interest: 0.10, label: 'NORMAL', color: '#00e5ff' },
-    hard:   { days: 20, cash: 1000, debt: 8000, interest: 0.15, label: 'HARD',   color: '#ff1744' },
+    easy:   { days: 40, cash: 5500, debt: 3000, interest: 0.05, label: 'EASY',   color: '#00e676' },
+    normal: { days: 30, cash: 2500, debt: 5500, interest: 0.10, label: 'NORMAL', color: '#00e5ff' },
+    hard:   { days: 20, cash: 1500, debt: 8000, interest: 0.15, label: 'HARD',   color: '#ff1744' },
 };
 
 export const ACHIEVEMENTS = [
@@ -129,7 +129,7 @@ export const PERKS = [
     { id: 'vpn_shield',    name: 'VPN Shield',    cost: 4000, icon: '🛡️', desc: 'Heat decays 2x faster' },
     { id: 'insider_info',  name: 'Insider Info',  cost: 2500, icon: '📡', desc: 'See price predictions in travel menu' },
     { id: 'extra_storage', name: 'Cloud Storage', cost: 2000, icon: '☁️', desc: '+75 storage capacity' },
-    { id: 'fast_travel',   name: 'Private Jet',   cost: 5000, icon: '✈️', desc: '50% chance travel is free (no day cost)' },
+    { id: 'fast_travel',   name: 'Private Jet',   cost: 5000, icon: '✈️', desc: '50% chance travel is free (no day or airfare cost)' },
     { id: 'tax_lawyer',    name: 'Tax Lawyer',    cost: 3500, icon: '⚖️', desc: 'Halve loan interest rate' },
     { id: 'bodyguard',     name: 'Bodyguard',     cost: 3000, icon: '💪', desc: 'Immune to mugging events' },
     { id: 'market_maker',  name: 'Market Maker',  cost: 4500, icon: '📈', desc: 'Supply/demand impact reduced by 50%' },
@@ -536,3 +536,8 @@ export const MISSION_TEMPLATES = [
 export const STARTING_STORAGE = 100;
 export const STORAGE_UPGRADE_COST = 1500;
 export const STORAGE_UPGRADE_AMOUNT = 50;
+
+// Travel fare: base + per-km rate scaled by distance, with daily fuel surcharge fluctuation
+export const TRAVEL_BASE_FARE = 50;       // minimum fare floor
+export const TRAVEL_KM_RATE = 0.012;      // $ per km of great-circle distance
+export const TRAVEL_SURGE_RANGE = 0.30;   // ±30% daily fuel/demand surcharge
