@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('achievements-btn').addEventListener('click', showAchievements);
     document.getElementById('achievements-back-btn').addEventListener('click', () => showScreen('title-screen'));
     document.getElementById('restart-btn').addEventListener('click', () => { checkForResume(); startMatrixRain(); showScreen('title-screen'); });
+    document.getElementById('wipeout-restart-btn')?.addEventListener('click', () => { checkForResume(); startMatrixRain(); showScreen('title-screen'); });
 
     // Game actions
     document.getElementById('travel-btn').addEventListener('click', () => openTravel(updateUI, endGame));

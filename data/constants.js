@@ -121,6 +121,7 @@ export const ACHIEVEMENTS = [
     { id: 'degen',        name: 'Full Degen',       icon: '🎰', desc: 'Make 50+ trades in a single game' },
     { id: 'paper_hands',  name: 'Paper Hands',      icon: '🧻', desc: 'Sell at a loss 5 times' },
     { id: 'hodler',       name: 'HODL Gang',        icon: '💎', desc: 'End the game holding 8+ asset types' },
+    { id: 'wiped_out',   name: 'Rock Bottom',      icon: '🪦', desc: 'Get wiped out (go completely broke)' },
 ];
 
 export const PERKS = [

@@ -1,5 +1,5 @@
 import { ASSETS } from '../data/constants.js';
-import { state, calcNetWorth, calcAssetValue, addLog } from './state.js';
+import { state, calcNetWorth, calcAssetValue, usedStorage, addLog } from './state.js';
 import { regeneratePrices, snapshotPrices } from './prices.js';
 import { triggerRandomEvent, triggerRaid } from './events.js';
 import { triggerEncounter } from './encounters.js';
@@ -70,6 +70,13 @@ export function advanceDay(endGameFn) {
             checkAchievement('diamond_hands');
         }
     });
+
+    // Bankruptcy check — wiped out if $0 cash, 0 inventory, and can't borrow
+    if (state.cash <= 0 && usedStorage() === 0 && state.debt >= 50000) {
+        // Truly broke — no cash, nothing to sell, maxed out debt
+        endGameFn('wipeout');
+        return;
+    }
 
     // Game over check — skip in unlimited mode
     if (!state.unlimited && state.day > state.maxDays) {

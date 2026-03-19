@@ -87,7 +87,12 @@ export function updateUI() {
     renderAIBot();
 }
 
-export function endGame() {
+export function endGame(reason) {
+    if (reason === 'wipeout') {
+        triggerWipeout();
+        return;
+    }
+
     state.gameOver = true;
 
     // End-of-game achievement checks
@@ -195,4 +200,84 @@ export function endGame() {
     setTimeout(drawFinalNetworthChart, 100);
     closeModals();
     showScreen('gameover-screen');
+}
+
+// Wipeout messages — the sad funny endings
+const WIPEOUT_MESSAGES = [
+    { icon: '🍔', msg: 'Time to try a new hustle. May I recommend delivering food?', sub: 'DoorDash is hiring. Flexible hours. No loan sharks.' },
+    { icon: '🚗', msg: 'Maybe rideshare is more your speed.', sub: 'At least Uber doesn\'t charge 15% daily interest.' },
+    { icon: '📦', msg: 'Have you considered a career in warehouse fulfillment?', sub: 'Amazon is always hiring. Benefits on day one. No feds.' },
+    { icon: '☕', msg: 'Time to become a barista. At least the coffee is free.', sub: '"One venti caramel macchiato for... bankruptcy?"' },
+    { icon: '🐕', msg: 'Dog walking pays surprisingly well these days.', sub: 'No SEC regulations. No rug pulls. Just good boys.' },
+    { icon: '🎸', msg: 'Maybe follow your real passion. Start a SoundCloud.', sub: 'Your crypto losses could make great lyrics.' },
+    { icon: '📚', msg: 'Time to go back to school.', sub: '"I\'d like to change my major from Crypto Twitter to Accounting."' },
+    { icon: '🧹', msg: 'The janitor at your co-working space is hiring an assistant.', sub: 'Ironic? Yes. Stable income? Also yes.' },
+    { icon: '🍕', msg: 'Pizza delivery is honest work.', sub: 'Unlike that Ponzi scheme you fell for on day 3.' },
+    { icon: '🏠', msg: 'Time to move back in with your parents.', sub: '"It\'s just temporary, Mom. I\'m restructuring my portfolio."' },
+    { icon: '💈', msg: 'Learn a trade. Barbers always have work.', sub: 'Nobody\'s cutting hair with a blockchain. Yet.' },
+    { icon: '🎪', msg: 'The circus is hiring. You already have clown experience.', sub: 'Your trading history qualifies as performance art.' },
+    { icon: '🌮', msg: 'Taco truck operator is a respected profession.', sub: 'Cash business. No margin calls. Only margins on tacos.' },
+    { icon: '🧘', msg: 'Maybe it\'s time for a spiritual retreat.', sub: '"I lost everything in fake internet money and all I got was enlightenment."' },
+    { icon: '🎮', msg: 'At least you\'re good at video games. Oh wait.', sub: 'You literally just lost at one.' },
+];
+
+export function triggerWipeout() {
+    state.gameOver = true;
+    checkAchievement('wiped_out');
+    autoSave();
+    AudioEngine.play('event_bad');
+
+    const msg = WIPEOUT_MESSAGES[Math.floor(Math.random() * WIPEOUT_MESSAGES.length)];
+
+    document.getElementById('wipeout-icon').textContent = msg.icon;
+    document.getElementById('wipeout-message').textContent = msg.msg;
+    document.getElementById('wipeout-suggestion').textContent = msg.sub;
+
+    // Stats
+    const statsEl = document.getElementById('wipeout-stats');
+    statsEl.innerHTML = '';
+
+    function addRow(label, value, cls) {
+        const row = document.createElement('div');
+        row.className = 'stat-row';
+        const lbl = document.createElement('span');
+        lbl.className = 'stat-label';
+        lbl.textContent = label;
+        const val = document.createElement('span');
+        val.className = `stat-value ${cls || ''}`;
+        val.textContent = value;
+        row.appendChild(lbl);
+        row.appendChild(val);
+        statsEl.appendChild(row);
+    }
+
+    addRow('Survived', `${state.day} days`);
+    addRow('Final Cash', '$0', 'negative');
+    addRow('Final Debt', `$${state.debt.toLocaleString()}`, 'negative');
+    addRow('Trades Made', `${state.totalTradesMade}`);
+    addRow('Total Profit', `$${state.totalProfit.toLocaleString()}`, 'positive');
+    addRow('Total Loss', `$${state.totalLoss.toLocaleString()}`, 'negative');
+    addRow('Cause of Death', 'Bankruptcy', 'negative');
+
+    // Show achievements if any were earned
+    const achDiv = document.getElementById('wipeout-achievements');
+    if (state.achievementsEarned.length > 0) {
+        achDiv.style.display = 'block';
+        achDiv.innerHTML = '';
+        const header = document.createElement('div');
+        header.style.cssText = 'color:var(--yellow);font-size:0.7rem;letter-spacing:0.1em;margin-bottom:0.3rem;';
+        header.textContent = 'ACHIEVEMENTS EARNED';
+        achDiv.appendChild(header);
+        state.achievementsEarned.forEach(id => {
+            const a = ACHIEVEMENTS.find(x => x.id === id);
+            if (!a) return;
+            const item = document.createElement('div');
+            item.className = 'gameover-ach-item';
+            item.textContent = `${a.icon} ${a.name}`;
+            achDiv.appendChild(item);
+        });
+    } else { achDiv.style.display = 'none'; }
+
+    closeModals();
+    showScreen('wipeout-screen');
 }
