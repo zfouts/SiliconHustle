@@ -19,6 +19,12 @@ COPY systems/ /usr/share/nginx/html/systems/
 COPY ui/ /usr/share/nginx/html/ui/
 
 # Inject git commit into the footer at build time
-RUN sed -i "s|Silicon Hustle is a fictional game.|Silicon Hustle is a fictional game. Build: ${GIT_COMMIT}|" /usr/share/nginx/html/index.html
+# Sanitize GIT_COMMIT to prevent sed command injection (allow only hex chars)
+RUN SAFE_COMMIT=$(printf '%s' "${GIT_COMMIT}" | tr -cd 'a-f0-9A-F') && \
+    if [ -z "${SAFE_COMMIT}" ]; then SAFE_COMMIT="unknown"; fi && \
+    sed -i "s|Silicon Hustle is a fictional game.|Silicon Hustle is a fictional game. Build: ${SAFE_COMMIT}|" /usr/share/nginx/html/index.html
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget -qO /dev/null http://localhost:80/ || exit 1
 
 EXPOSE 80

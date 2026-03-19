@@ -38,7 +38,8 @@ function validateSave(s) {
     const objFields = ['inventory','costBasis','holdingSince','prices','priceHistory','supplyDemand'];
 
     if (!s || typeof s !== 'object' || Array.isArray(s)) return false;
-    for (const k of numFields) { if (k in s && typeof s[k] !== 'number') return false; }
+    // Validate types and reject NaN/Infinity for numerics
+    for (const k of numFields) { if (k in s && (typeof s[k] !== 'number' || !Number.isFinite(s[k]))) return false; }
     for (const k of strFields) { if (k in s && typeof s[k] !== 'string') return false; }
     for (const k of boolFields) { if (k in s && typeof s[k] !== 'boolean') return false; }
     for (const k of arrFields) { if (k in s && !Array.isArray(s[k])) return false; }
@@ -53,6 +54,17 @@ function validateSave(s) {
     if (typeof s.maxDays === 'number' && (s.maxDays < 0 || s.maxDays > 999)) return false; // 0 = unlimited
     if (typeof s.heat === 'number') s.heat = Math.max(0, Math.min(100, s.heat));
     if (typeof s.maxStorage === 'number') s.maxStorage = Math.max(1, Math.min(10000, s.maxStorage));
+
+    // Range bounds on financial / counter fields to prevent overflow and cheating
+    if (typeof s.cash === 'number') s.cash = Math.max(0, Math.min(100_000_000, s.cash));
+    if (typeof s.debt === 'number') s.debt = Math.max(0, Math.min(10_000_000, s.debt));
+    if (typeof s.interestRate === 'number') s.interestRate = Math.max(0, Math.min(1, s.interestRate));
+    if (typeof s.totalProfit === 'number') s.totalProfit = Math.max(0, Math.min(100_000_000, s.totalProfit));
+    if (typeof s.totalLoss === 'number') s.totalLoss = Math.max(0, Math.min(100_000_000, s.totalLoss));
+    if (typeof s.totalTradesMade === 'number') s.totalTradesMade = Math.max(0, Math.min(100_000, s.totalTradesMade));
+    if (typeof s.completedMissionCount === 'number') s.completedMissionCount = Math.max(0, Math.min(1000, s.completedMissionCount));
+    if (typeof s.muggingImmunity === 'number') s.muggingImmunity = Math.max(0, Math.min(100, s.muggingImmunity));
+    if (typeof s.lossSellCount === 'number') s.lossSellCount = Math.max(0, Math.min(100_000, s.lossSellCount));
 
     // Deep validation: inventory values must be non-negative finite integers
     if (s.inventory && typeof s.inventory === 'object') {
@@ -84,6 +96,33 @@ function validateSave(s) {
                 const v = s.prices[ci][aid];
                 if (typeof v !== 'number' || !Number.isFinite(v) || v < 1) s.prices[ci][aid] = 1;
                 else s.prices[ci][aid] = Math.min(300_000, Math.round(v));
+            }
+        }
+    }
+
+    // Deep validation: priceHistory must be nested objects with arrays of bounded numbers
+    if (s.priceHistory && typeof s.priceHistory === 'object') {
+        for (const ci of Object.keys(s.priceHistory)) {
+            if (typeof s.priceHistory[ci] !== 'object' || s.priceHistory[ci] === null) { s.priceHistory[ci] = {}; continue; }
+            for (const aid of Object.keys(s.priceHistory[ci])) {
+                const arr = s.priceHistory[ci][aid];
+                if (!Array.isArray(arr)) { s.priceHistory[ci][aid] = []; continue; }
+                s.priceHistory[ci][aid] = arr
+                    .filter(v => typeof v === 'number' && Number.isFinite(v) && v >= 1)
+                    .map(v => Math.min(300_000, Math.round(v)))
+                    .slice(-90);
+            }
+        }
+    }
+
+    // Deep validation: supplyDemand must be nested objects with bounded finite numbers
+    if (s.supplyDemand && typeof s.supplyDemand === 'object') {
+        for (const ci of Object.keys(s.supplyDemand)) {
+            if (typeof s.supplyDemand[ci] !== 'object' || s.supplyDemand[ci] === null) { s.supplyDemand[ci] = {}; continue; }
+            for (const aid of Object.keys(s.supplyDemand[ci])) {
+                const v = s.supplyDemand[ci][aid];
+                if (typeof v !== 'number' || !Number.isFinite(v)) s.supplyDemand[ci][aid] = 0;
+                else s.supplyDemand[ci][aid] = Math.max(-1000, Math.min(1000, v));
             }
         }
     }
@@ -206,9 +245,13 @@ export function initGame(resumeState, updateUI, unlimitedMode) {
     });
 
     // Randomly pick 2-3 cities that have loan sharks this game
+    // Fisher-Yates shuffle for unbiased randomization (sort comparator is biased)
     const cityIndices = Array.from({ length: CITIES.length }, (_, i) => i);
-    const shuffled = cityIndices.sort(() => Math.random() - 0.5);
-    state.loanSharkCities = shuffled.slice(0, 2 + Math.floor(Math.random() * 2)); // 2 or 3 cities
+    for (let i = cityIndices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cityIndices[i], cityIndices[j]] = [cityIndices[j], cityIndices[i]];
+    }
+    state.loanSharkCities = cityIndices.slice(0, 2 + Math.floor(Math.random() * 2)); // 2 or 3 cities
 
     ASSETS.forEach(a => {
         state.inventory[a.id] = 0;

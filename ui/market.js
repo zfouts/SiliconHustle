@@ -7,6 +7,53 @@ import { hasPerk } from '../systems/perks.js';
 
 let sparklineRafId = null;
 
+// DOM helpers — avoid innerHTML with dynamic data to prevent XSS
+function mkTd(content, className) {
+    const td = document.createElement('td');
+    if (className) td.className = className;
+    if (content !== undefined) td.textContent = content;
+    return td;
+}
+
+function mkSpan(content, className, style) {
+    const el = document.createElement('span');
+    if (className) el.className = className;
+    if (style) el.style.cssText = style;
+    if (content !== undefined) el.textContent = content;
+    return el;
+}
+
+function buildAssetNameCell(asset, dealTagEl) {
+    const td = document.createElement('td');
+    td.appendChild(mkSpan(asset.icon, 'asset-icon'));
+    const name = mkSpan(asset.name, 'asset-name');
+    name.dataset.asset = asset.id;
+    td.appendChild(name);
+    if (dealTagEl) td.appendChild(dealTagEl);
+    td.appendChild(document.createElement('br'));
+    td.appendChild(mkSpan(asset.category, 'asset-category'));
+    return td;
+}
+
+function buildActionButtons(assetId, owned) {
+    const td = document.createElement('td');
+    td.className = 'asset-actions';
+    const buy = document.createElement('button');
+    buy.className = 'btn btn-buy';
+    buy.dataset.action = 'buy';
+    buy.dataset.asset = assetId;
+    buy.textContent = 'BUY';
+    td.appendChild(buy);
+    const sell = document.createElement('button');
+    sell.className = 'btn btn-sell';
+    sell.dataset.action = 'sell';
+    sell.dataset.asset = assetId;
+    sell.textContent = 'SELL';
+    if (owned <= 0) sell.disabled = true;
+    td.appendChild(sell);
+    return td;
+}
+
 export function openAssetDetail(assetId) {
     AudioEngine.play('click');
     const asset = ASSETS.find(a => a.id === assetId);
@@ -220,21 +267,35 @@ export function renderMarketTable() {
             const arbClass = arbPct <= -5 ? 'arb-positive' : arbPct >= 5 ? 'arb-negative' : 'arb-neutral';
             const sigClass = sig.signal === 'BUY' ? 'signal-buy' : sig.signal === 'SELL' ? 'signal-sell' : 'signal-hold';
 
-            tr.innerHTML = `
-                <td><span class="asset-icon">${asset.icon}</span><span class="asset-name" data-asset="${asset.id}">${asset.name}</span><br><span class="asset-category">${asset.category}</span></td>
-                <td>$${localPrice.toLocaleString()}</td>
-                <td class="global-price">$${globalPrice.toLocaleString()}</td>
-                <td><span class="${arbClass}">${arbPct >= 0 ? '+' : ''}${arbPct.toFixed(1)}%</span></td>
-                <td class="sparkline-cell"><canvas class="sparkline-global" data-asset="${asset.id}" width="70" height="24"></canvas></td>
-                <td><span class="${sigClass}">${sig.signal}</span><br><span style="color:var(--text-dim);font-size:0.55rem">${sig.reason}</span></td>
-                <td class="asset-actions"><button class="btn btn-buy" data-action="buy" data-asset="${asset.id}">BUY</button><button class="btn btn-sell" data-action="sell" data-asset="${asset.id}" ${owned <= 0 ? 'disabled' : ''}>SELL</button></td>
-            `;
+            tr.appendChild(buildAssetNameCell(asset));
+            tr.appendChild(mkTd('$' + localPrice.toLocaleString()));
+            tr.appendChild(mkTd('$' + globalPrice.toLocaleString(), 'global-price'));
+
+            const arbTd = mkTd(undefined);
+            arbTd.appendChild(mkSpan((arbPct >= 0 ? '+' : '') + arbPct.toFixed(1) + '%', arbClass));
+            tr.appendChild(arbTd);
+
+            const sparkTd = mkTd(undefined, 'sparkline-cell');
+            const sparkCanvas = document.createElement('canvas');
+            sparkCanvas.className = 'sparkline-global';
+            sparkCanvas.dataset.asset = asset.id;
+            sparkCanvas.width = 70;
+            sparkCanvas.height = 24;
+            sparkTd.appendChild(sparkCanvas);
+            tr.appendChild(sparkTd);
+
+            const sigTd = mkTd(undefined);
+            sigTd.appendChild(mkSpan(sig.signal, sigClass));
+            sigTd.appendChild(document.createElement('br'));
+            sigTd.appendChild(mkSpan(sig.reason, undefined, 'color:var(--text-dim);font-size:0.55rem'));
+            tr.appendChild(sigTd);
+
+            tr.appendChild(buildActionButtons(asset.id, owned));
         } else if (isGlobal) {
             // LIMITED GLOBAL VIEW (no AI): just local, global avg, and a vague spread indicator
             const globalPrice = getGlobalPrice(asset.id);
             const arbPct = globalPrice > 0 ? ((localPrice - globalPrice) / globalPrice * 100) : 0;
 
-            // Vague spread: only shows "cheap" / "fair" / "pricey" — no exact %
             let spreadLabel = 'FAIR';
             let spreadClass = 'arb-neutral';
             if (arbPct <= -12) { spreadLabel = 'CHEAP HERE'; spreadClass = 'arb-positive'; }
@@ -242,15 +303,17 @@ export function renderMarketTable() {
             else if (arbPct >= 12) { spreadLabel = 'PRICEY HERE'; spreadClass = 'arb-negative'; }
             else if (arbPct >= 5) { spreadLabel = 'ABOVE AVG'; spreadClass = 'arb-negative'; }
 
-            tr.innerHTML = `
-                <td><span class="asset-icon">${asset.icon}</span><span class="asset-name" data-asset="${asset.id}">${asset.name}</span><br><span class="asset-category">${asset.category}</span></td>
-                <td>$${localPrice.toLocaleString()}</td>
-                <td class="global-price">$${globalPrice.toLocaleString()}</td>
-                <td><span class="${spreadClass}" style="font-size:0.65rem">${spreadLabel}</span></td>
-                <td>${owned > 0 ? owned : '--'}</td>
-                <td class="asset-actions"><button class="btn btn-buy" data-action="buy" data-asset="${asset.id}">BUY</button><button class="btn btn-sell" data-action="sell" data-asset="${asset.id}" ${owned <= 0 ? 'disabled' : ''}>SELL</button></td>
-                <td></td>
-            `;
+            tr.appendChild(buildAssetNameCell(asset));
+            tr.appendChild(mkTd('$' + localPrice.toLocaleString()));
+            tr.appendChild(mkTd('$' + globalPrice.toLocaleString(), 'global-price'));
+
+            const spreadTd = mkTd(undefined);
+            spreadTd.appendChild(mkSpan(spreadLabel, spreadClass, 'font-size:0.65rem'));
+            tr.appendChild(spreadTd);
+
+            tr.appendChild(mkTd(owned > 0 ? String(owned) : '--'));
+            tr.appendChild(buildActionButtons(asset.id, owned));
+            tr.appendChild(mkTd(undefined));
         } else {
             // LOCAL VIEW (ALL / PORTFOLIO tabs)
             const history = state.priceHistory[ci]?.[asset.id] || [];
@@ -261,38 +324,61 @@ export function renderMarketTable() {
             const avg = history.length > 0 ? history.reduce((s, v) => s + v, 0) / history.length : localPrice;
             const vsAvg = avg > 0 ? ((localPrice - avg) / avg * 100) : 0;
 
-            // Deal tags: global arbitrage tags ONLY with AI perk, historical tags always
-            let dealTag = '';
+            // Build deal tag as DOM element instead of HTML string
+            let dealTagEl = null;
             if (hasAI) {
                 const globalPrice = getGlobalPrice(asset.id);
                 const arbPct = globalPrice > 0 ? ((localPrice - globalPrice) / globalPrice * 100) : 0;
-                if (arbPct <= -15) dealTag = '<span class="deal-tag cheap">CHEAP vs GLOBAL</span>';
-                else if (arbPct >= 15) dealTag = '<span class="deal-tag expensive">PRICEY vs GLOBAL</span>';
+                if (arbPct <= -15) dealTagEl = mkSpan('CHEAP vs GLOBAL', 'deal-tag cheap');
+                else if (arbPct >= 15) dealTagEl = mkSpan('PRICEY vs GLOBAL', 'deal-tag expensive');
             }
-            // Historical deal tags (always available — these don't need AI)
-            if (!dealTag) {
-                if (vsAvg <= -30) dealTag = '<span class="deal-tag cheap">DEAL</span>';
-                else if (vsAvg >= 40) dealTag = '<span class="deal-tag expensive">PEAK</span>';
+            if (!dealTagEl) {
+                if (vsAvg <= -30) dealTagEl = mkSpan('DEAL', 'deal-tag cheap');
+                else if (vsAvg >= 40) dealTagEl = mkSpan('PEAK', 'deal-tag expensive');
             }
 
-            let pnlHtml = '<span class="pnl-neutral">--</span>';
+            tr.appendChild(buildAssetNameCell(asset, dealTagEl));
+            tr.appendChild(mkTd('$' + localPrice.toLocaleString(), isUp ? 'price-up' : 'price-down'));
+
+            const sparkTd = mkTd(undefined, 'sparkline-cell');
+            const sparkCanvas = document.createElement('canvas');
+            sparkCanvas.className = 'sparkline';
+            sparkCanvas.dataset.asset = asset.id;
+            sparkCanvas.width = 70;
+            sparkCanvas.height = 24;
+            sparkTd.appendChild(sparkCanvas);
+            tr.appendChild(sparkTd);
+
+            const trendTd = mkTd(undefined);
+            trendTd.appendChild(mkSpan((isUp ? '\u25B2' : '\u25BC') + ' ' + Math.abs(pctChange).toFixed(1) + '%', 'trend-indicator ' + (isUp ? 'price-up' : 'price-down')));
+            tr.appendChild(trendTd);
+
+            // Owned cell
+            const ownedTd = mkTd(undefined);
+            if (owned > 0) {
+                ownedTd.appendChild(document.createTextNode(String(owned) + ' '));
+                ownedTd.appendChild(mkSpan('@$' + avgCost.toLocaleString(), undefined, 'color:var(--text-dim);font-size:0.6rem'));
+            } else {
+                ownedTd.textContent = '--';
+            }
+            tr.appendChild(ownedTd);
+
+            // P&L cell
+            const pnlTd = mkTd(undefined);
             if (owned > 0 && avgCost > 0) {
                 const pnl = (localPrice - avgCost) * owned;
                 const pnlPct = ((localPrice - avgCost) / avgCost * 100).toFixed(1);
-                pnlHtml = pnl >= 0
-                    ? `<span class="pnl-positive">+$${pnl.toLocaleString()} (${pnlPct}%)</span>`
-                    : `<span class="pnl-negative">-$${Math.abs(pnl).toLocaleString()} (${pnlPct}%)</span>`;
+                if (pnl >= 0) {
+                    pnlTd.appendChild(mkSpan('+$' + pnl.toLocaleString() + ' (' + pnlPct + '%)', 'pnl-positive'));
+                } else {
+                    pnlTd.appendChild(mkSpan('-$' + Math.abs(pnl).toLocaleString() + ' (' + pnlPct + '%)', 'pnl-negative'));
+                }
+            } else {
+                pnlTd.appendChild(mkSpan('--', 'pnl-neutral'));
             }
+            tr.appendChild(pnlTd);
 
-            tr.innerHTML = `
-                <td><span class="asset-icon">${asset.icon}</span><span class="asset-name" data-asset="${asset.id}">${asset.name}</span>${dealTag}<br><span class="asset-category">${asset.category}</span></td>
-                <td class="${isUp ? 'price-up' : 'price-down'}">$${localPrice.toLocaleString()}</td>
-                <td class="sparkline-cell"><canvas class="sparkline" data-asset="${asset.id}" width="70" height="24"></canvas></td>
-                <td><span class="trend-indicator ${isUp ? 'price-up' : 'price-down'}">${isUp ? '▲' : '▼'} ${Math.abs(pctChange).toFixed(1)}%</span></td>
-                <td>${owned > 0 ? `${owned} <span style="color:var(--text-dim);font-size:0.6rem">@$${avgCost.toLocaleString()}</span>` : '--'}</td>
-                <td>${pnlHtml}</td>
-                <td class="asset-actions"><button class="btn btn-buy" data-action="buy" data-asset="${asset.id}">BUY</button><button class="btn btn-sell" data-action="sell" data-asset="${asset.id}" ${owned <= 0 ? 'disabled' : ''}>SELL</button></td>
-            `;
+            tr.appendChild(buildActionButtons(asset.id, owned));
         }
 
         tbody.appendChild(tr);

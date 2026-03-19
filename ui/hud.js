@@ -186,7 +186,9 @@ export function endGame(reason) {
         saveBtn.style.display = 'inline-block';
         nameInput.value = '';
         saveBtn.onclick = () => {
-            saveHighScore((nameInput.value.trim() || 'Anonymous').substring(0, 16), netWorth, state.difficulty);
+            // Sanitize name: trim, remove control chars / HTML, cap length
+            const rawName = nameInput.value.trim().replace(/[<>&"'/\\]/g, '').replace(/[\x00-\x1f\x7f]/g, '');
+            saveHighScore((rawName || 'Anonymous').substring(0, 16), netWorth, state.difficulty);
             hsNotice.style.display = 'none';
             nameInput.style.display = 'none';
             saveBtn.style.display = 'none';

@@ -9,10 +9,10 @@ export function getHighScores() {
             .filter(s => s && typeof s === 'object' && typeof s.name === 'string')
             .slice(0, 10)
             .map(s => ({
-                name: String(s.name).substring(0, 32),
+                name: String(s.name).replace(/<[^>]*>/g, '').replace(/[<>&"']/g, '').substring(0, 32),
                 score: Number(s.score) || 0,
-                diff: String(s.diff || ''),
-                date: String(s.date || ''),
+                diff: String(s.diff || '').replace(/[^a-zA-Z]/g, ''),
+                date: String(s.date || '').replace(/[^0-9\-]/g, ''),
             }));
     } catch { return []; }
 }
