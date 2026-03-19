@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silicon Hustle — Trade. Hustle. Survive.</title>
+    <meta name="description" content="A modernized Dope Wars style trading game. Buy low, sell high, dodge the feds, and hustle your way to the top across global tech hubs.">
+    <meta property="og:title" content="Silicon Hustle">
+    <meta property="og:description" content="Trade volatile digital assets across global tech hubs. Pay off your loan shark. Don't get caught.">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Silicon Hustle">
+    <meta name="twitter:description" content="A modernized Dope Wars style trading game. Buy low, sell high, dodge the feds.">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div class="crt-overlay"></div>
+        <div id="toast-container"></div>
+
+        <!-- Title Screen -->
+        <div id="title-screen" class="screen active">
+            <canvas id="matrix-bg"></canvas>
+            <div class="title-container">
+                <h1 class="glitch" data-text="SILICON HUSTLE">SILICON HUSTLE</h1>
+                <p class="subtitle">Buy low. Sell high. Don't get caught.</p>
+                <div class="title-art">
+                    <pre>
+    ╔══════════════════════════════════╗
+    ║  ░▒▓ TRADE ▓▒░  ░▒▓ PROFIT ▓▒░ ║
+    ║  ▄▄▄▄▄ ┌──┐ ▄▄▄▄▄  ┌──────┐   ║
+    ║  █ $ █ │▲▲│ █ ₿ █  │ ◆◆◆◆ │   ║
+    ║  ▀▀▀▀▀ └──┘ ▀▀▀▀▀  └──────┘   ║
+    ╚══════════════════════════════════╝
+                    </pre>
+                </div>
+
+                <!-- Game Setup -->
+                <div class="game-setup">
+                    <div class="setup-row">
+                        <span class="diff-label">DIFFICULTY</span>
+                        <div class="diff-buttons">
+                            <button class="btn btn-small diff-btn" data-diff="easy">EASY</button>
+                            <button class="btn btn-small diff-btn active" data-diff="normal">NORMAL</button>
+                            <button class="btn btn-small diff-btn" data-diff="hard">HARD</button>
+                        </div>
+                    </div>
+                    <div class="setup-row">
+                        <span class="diff-label">GAME LENGTH</span>
+                        <div class="days-slider-container">
+                            <input type="range" id="days-slider" min="10" max="65" value="30" step="5" class="days-slider">
+                            <span id="days-value" class="days-value">30 DAYS</span>
+                        </div>
+                    </div>
+                    <div class="setup-summary" id="setup-summary">
+                        $2,000 cash | $5,500 debt | 10% interest/day
+                    </div>
+                </div>
+
+                <button id="start-btn" class="btn btn-primary btn-large">START HUSTLING</button>
+                <div class="title-secondary-btns">
+                    <button id="help-btn" class="btn btn-secondary">HOW TO PLAY</button>
+                    <button id="scores-btn" class="btn btn-secondary">HIGH SCORES</button>
+                    <button id="achievements-btn" class="btn btn-secondary">ACHIEVEMENTS</button>
+                </div>
+                <div id="resume-notice" class="resume-notice" style="display:none">
+                    <button id="resume-btn" class="btn btn-secondary">RESUME SAVED GAME (Day <span id="resume-day"></span>)</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Screen -->
+        <div id="help-screen" class="screen">
+            <div class="panel help-panel">
+                <h2>HOW TO PLAY</h2>
+                <div class="help-content">
+                    <p><strong>Trade volatile digital assets</strong> across global tech hubs. Pay off your debt and build your fortune before time runs out.</p>
+                    <h3>BASICS</h3>
+                    <ul>
+                        <li><strong>Buy low, sell high</strong> -- prices vary between cities</li>
+                        <li><strong>Travel</strong> between cities (costs 1 day)</li>
+                        <li><strong>Click asset names</strong> to see cross-city price comparison</li>
+                        <li><strong>Pay off your debt</strong> -- interest compounds daily!</li>
+                    </ul>
+                    <h3>MISSIONS</h3>
+                    <ul>
+                        <li>Accept <strong>side missions</strong> for bonus cash rewards</li>
+                        <li>Deliver assets to specific cities, hit price targets, or collect sets</li>
+                        <li>Up to 2 active missions at once</li>
+                    </ul>
+                    <h3>PERKS</h3>
+                    <ul>
+                        <li>Buy <strong>permanent upgrades</strong> from the Perk Shop</li>
+                        <li>Reduce buy prices, increase storage, lower heat, and more</li>
+                    </ul>
+                    <h3>ENCOUNTERS</h3>
+                    <ul>
+                        <li>Random <strong>choice events</strong> with risk/reward decisions</li>
+                        <li>Shady deals, mysterious strangers, and opportunities</li>
+                    </ul>
+                    <h3>HEAT &amp; CONTRABAND</h3>
+                    <ul>
+                        <li>Trading <strong>ZeroDayExploits</strong> raises your heat level</li>
+                        <li>High heat = feds can <strong>raid you</strong></li>
+                        <li>Buy <strong>insurance</strong> or the <strong>VPN Shield</strong> perk for protection</li>
+                    </ul>
+                    <h3>KEYBOARD SHORTCUTS</h3>
+                    <ul>
+                        <li><strong>T</strong> Travel | <strong>L</strong> Loan Shark | <strong>P</strong> Perks | <strong>Esc</strong> Close</li>
+                    </ul>
+                </div>
+                <button id="help-back-btn" class="btn btn-secondary">BACK</button>
+            </div>
+        </div>
+
+        <!-- High Scores Screen -->
+        <div id="scores-screen" class="screen">
+            <div class="panel scores-panel">
+                <h2>HIGH SCORES</h2>
+                <div id="scores-list"></div>
+                <button id="scores-back-btn" class="btn btn-secondary">BACK</button>
+            </div>
+        </div>
+
+        <!-- Achievements Screen -->
+        <div id="achievements-screen" class="screen">
+            <div class="panel achievements-panel">
+                <h2>ACHIEVEMENTS</h2>
+                <div id="achievements-list"></div>
+                <button id="achievements-back-btn" class="btn btn-secondary">BACK</button>
+            </div>
+        </div>
+
+        <!-- Main Game Screen -->
+        <div id="game-screen" class="screen">
+            <div id="hud">
+                <div class="hud-left">
+                    <div class="hud-item">
+                        <span class="hud-label">CASH</span>
+                        <span id="hud-cash" class="hud-value cash">$2,000</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-label">DEBT</span>
+                        <span id="hud-debt" class="hud-value debt">$5,500</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-label">NET WORTH</span>
+                        <span id="hud-networth" class="hud-value cash">-$3,500</span>
+                    </div>
+                </div>
+                <div class="hud-center">
+                    <div class="hud-item">
+                        <span class="hud-label">CITY</span>
+                        <span id="hud-city" class="hud-value city">San Francisco</span>
+                    </div>
+                    <div class="day-bar-container">
+                        <span class="hud-label">DAY <span id="hud-day">1</span>/<span id="hud-max-days">30</span></span>
+                        <div class="day-bar">
+                            <div id="day-bar-fill" class="day-bar-fill"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hud-right">
+                    <div class="hud-item">
+                        <span class="hud-label">STORAGE</span>
+                        <span id="hud-storage" class="hud-value">0/100</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-label">HEAT</span>
+                        <div class="heat-bar">
+                            <div id="heat-bar-fill" class="heat-bar-fill" style="width: 0%"></div>
+                        </div>
+                        <span id="hud-heat" class="hud-value heat-cool">COOL</span>
+                    </div>
+                    <div class="hud-item">
+                        <span class="hud-label">TREND</span>
+                        <canvas id="networth-spark" width="80" height="28"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="main-content">
+                <div id="market-panel" class="panel">
+                    <div class="panel-header">
+                        <h2>MARKET <span id="market-city-name"></span></h2>
+                        <div class="market-tabs">
+                            <button class="tab-btn active" data-tab="all">ALL</button>
+                            <button class="tab-btn" data-tab="portfolio">PORTFOLIO</button>
+                            <button class="tab-btn" data-tab="global">GLOBAL</button>
+                        </div>
+                    </div>
+                    <div id="market-table-container">
+                        <table id="market-table">
+                            <thead><tr id="market-thead-row">
+                                <th>Asset</th><th>Price</th><th>7d Chart</th><th>Trend</th><th>Owned</th><th>P&L</th><th>Actions</th>
+                            </tr></thead>
+                            <tbody id="market-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="side-panel">
+                    <div class="panel" id="actions-panel">
+                        <h2>ACTIONS</h2>
+                        <button id="travel-btn" class="btn btn-primary btn-full"><span class="btn-icon">&#9992;</span> TRAVEL [T]</button>
+                        <button id="bank-btn" class="btn btn-secondary btn-full"><span class="btn-icon">&#9760;</span> <span id="bank-btn-label">LOAN SHARK [L]</span></button>
+                        <button id="perks-btn" class="btn btn-secondary btn-full"><span class="btn-icon">&#9733;</span> PERK SHOP [P]</button>
+                        <button id="upgrade-btn" class="btn btn-secondary btn-full"><span class="btn-icon">&#9650;</span> UPGRADE STORAGE ($1,500)</button>
+                        <button id="stash-btn" class="btn btn-secondary btn-full"><span class="btn-icon">&#9888;</span> DUMP ALL</button>
+                        <button id="retire-btn" class="btn btn-danger btn-full" style="display:none"><span class="btn-icon">&#9873;</span> RETIRE / END GAME</button>
+                    </div>
+
+                    <!-- AI Trading Bot -->
+                    <div class="panel" id="ai-bot-panel" style="display:none">
+                        <h2>AI TRADING BOT</h2>
+                        <div id="ai-bot-recommendations"></div>
+                    </div>
+
+                    <!-- Active Missions -->
+                    <div class="panel" id="missions-panel">
+                        <h2>MISSIONS</h2>
+                        <div id="missions-list"><span class="text-dim">No active missions. Travel to find work.</span></div>
+                    </div>
+
+                    <div class="panel" id="log-panel">
+                        <h2>NEWS FEED</h2>
+                        <div id="event-log"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Travel Modal -->
+        <div id="travel-modal" class="modal">
+            <div class="modal-content modal-wide">
+                <h2>CHOOSE DESTINATION</h2>
+                <p class="modal-subtitle">Travel costs 1 day. Choose wisely.</p>
+                <div id="city-list"></div>
+                <button class="btn btn-secondary btn-full modal-close">CANCEL</button>
+            </div>
+        </div>
+
+        <!-- Bank Modal -->
+        <div id="bank-modal" class="modal">
+            <div class="modal-content">
+                <h2>LOAN SHARK</h2>
+                <p class="modal-subtitle">Interest: <span id="bank-rate">10%</span> per day.</p>
+                <div class="bank-info">
+                    <div><strong>Debt:</strong> $<span id="bank-debt">0</span></div>
+                    <div><strong>Cash:</strong> $<span id="bank-cash">0</span></div>
+                </div>
+                <div class="bank-actions">
+                    <div class="bank-row">
+                        <label>Repay:</label>
+                        <input type="number" id="repay-amount" min="0" step="1" placeholder="Amount">
+                        <button id="repay-btn" class="btn btn-primary">REPAY</button>
+                        <button id="repay-all-btn" class="btn btn-small">ALL</button>
+                    </div>
+                    <div class="bank-row">
+                        <label>Borrow:</label>
+                        <input type="number" id="borrow-amount" min="0" max="10000" step="1" placeholder="Max $10,000">
+                        <button id="borrow-btn" class="btn btn-danger">BORROW</button>
+                    </div>
+                </div>
+                <button class="btn btn-secondary btn-full modal-close">CLOSE</button>
+            </div>
+        </div>
+
+        <!-- Trade Modal -->
+        <div id="trade-modal" class="modal">
+            <div class="modal-content">
+                <h2 id="trade-title">BUY</h2>
+                <div class="trade-info">
+                    <div><strong>Asset:</strong> <span id="trade-asset"></span></div>
+                    <div><strong>Price:</strong> $<span id="trade-price"></span></div>
+                    <div><strong>Owned:</strong> <span id="trade-owned"></span></div>
+                    <div><strong>Cash:</strong> $<span id="trade-cash"></span></div>
+                    <div><strong>Storage:</strong> <span id="trade-storage"></span></div>
+                    <div><strong>Avg Cost:</strong> $<span id="trade-avgcost">0</span></div>
+                </div>
+                <div class="trade-controls">
+                    <input type="number" id="trade-amount" min="1" value="1" placeholder="Qty">
+                    <div class="trade-presets">
+                        <button class="btn btn-small preset-btn" data-pct="25">25%</button>
+                        <button class="btn btn-small preset-btn" data-pct="50">50%</button>
+                        <button class="btn btn-small preset-btn" data-pct="75">75%</button>
+                        <button class="btn btn-small preset-btn" data-pct="100">MAX</button>
+                    </div>
+                    <div class="trade-total">Total: $<span id="trade-total">0</span></div>
+                    <button id="trade-confirm" class="btn btn-primary btn-full">CONFIRM</button>
+                </div>
+                <button class="btn btn-secondary btn-full modal-close">CANCEL</button>
+            </div>
+        </div>
+
+        <!-- Asset Detail Modal -->
+        <div id="detail-modal" class="modal">
+            <div class="modal-content modal-wide">
+                <h2 id="detail-title">ASSET DETAIL</h2>
+                <div class="detail-grid">
+                    <div class="detail-chart-container">
+                        <canvas id="detail-chart" width="380" height="140"></canvas>
+                    </div>
+                    <div class="detail-stats" id="detail-stats"></div>
+                </div>
+                <h3 class="detail-section-title">PRICES ACROSS ALL CITIES</h3>
+                <div id="detail-cities" class="detail-cities"></div>
+                <button class="btn btn-secondary btn-full modal-close">CLOSE</button>
+            </div>
+        </div>
+
+        <!-- Perks Modal -->
+        <div id="perks-modal" class="modal">
+            <div class="modal-content modal-wide">
+                <h2>PERK SHOP</h2>
+                <p class="modal-subtitle">Permanent upgrades. Invest in yourself.</p>
+                <div id="perks-list"></div>
+                <button class="btn btn-secondary btn-full modal-close">CLOSE</button>
+            </div>
+        </div>
+
+        <!-- Encounter Modal (choice-based) -->
+        <div id="encounter-modal" class="modal">
+            <div class="modal-content event-content">
+                <div id="enc-icon" class="event-icon"></div>
+                <h2 id="enc-title">ENCOUNTER</h2>
+                <p id="enc-text"></p>
+                <div id="enc-choices" class="encounter-choices"></div>
+            </div>
+        </div>
+
+        <!-- Black Market Modal -->
+        <div id="blackmarket-modal" class="modal">
+            <div class="modal-content">
+                <h2>BLACK MARKET</h2>
+                <p class="modal-subtitle">A shady dealer approaches you with exclusive offers...</p>
+                <div id="blackmarket-deals"></div>
+                <button class="btn btn-secondary btn-full modal-close">WALK AWAY</button>
+            </div>
+        </div>
+
+        <!-- Event Modal -->
+        <div id="event-modal" class="modal">
+            <div class="modal-content event-content">
+                <div id="event-icon" class="event-icon"></div>
+                <h2 id="event-title">EVENT</h2>
+                <p id="event-text"></p>
+                <button class="btn btn-primary btn-full modal-close">OK</button>
+            </div>
+        </div>
+
+        <!-- Travel Transition -->
+        <div id="travel-transition">
+            <div class="travel-inner">
+                <div class="travel-lines"></div>
+                <div id="travel-text" class="travel-text">Traveling to...</div>
+            </div>
+        </div>
+
+        <!-- Achievement Popup -->
+        <div id="achievement-popup" class="achievement-popup">
+            <div class="achievement-inner">
+                <span class="achievement-icon" id="ach-popup-icon"></span>
+                <div>
+                    <div class="achievement-label">ACHIEVEMENT UNLOCKED</div>
+                    <div class="achievement-name" id="ach-popup-name"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over -->
+        <div id="gameover-screen" class="screen">
+            <div class="panel gameover-panel">
+                <h1 class="gameover-title">GAME OVER</h1>
+                <canvas id="final-networth-chart" width="440" height="120"></canvas>
+                <div id="gameover-stats"></div>
+                <div id="gameover-rank"></div>
+                <div id="gameover-achievements" style="display:none"></div>
+                <div id="gameover-highscore" class="highscore-notice" style="display:none">NEW HIGH SCORE!</div>
+                <input type="text" id="gameover-name" class="name-input" placeholder="Enter your name..." maxlength="16" style="display:none">
+                <button id="save-score-btn" class="btn btn-primary btn-large" style="display:none">SAVE SCORE</button>
+                <button id="restart-btn" class="btn btn-primary btn-large">PLAY AGAIN</button>
+            </div>
+        </div>
+
+        <!-- Legal / Privacy / Disclaimer Modals -->
+    <div id="disclaimer-modal" class="modal">
+        <div class="modal-content modal-wide legal-modal">
+            <h2>DISCLAIMER</h2>
+            <div class="legal-text">
+                <p><strong>Silicon Hustle is a fictional video game created for entertainment purposes only.</strong></p>
+                <p>All characters, companies, assets, cities, prices, events, and scenarios depicted in this game are entirely fictional. Any resemblance to real persons, companies, cryptocurrencies, financial instruments, or actual events is purely coincidental and unintentional.</p>
+                <p>This game does not constitute financial advice, investment guidance, or a recommendation to buy, sell, or trade any real-world asset. The trading mechanics, price movements, and market events in this game are simulated and do not reflect how real financial markets operate.</p>
+                <p>The game contains references to fictional illegal activities (such as contraband trading and loan sharking) within its game narrative. These are gameplay mechanics only and should not be interpreted as endorsement or encouragement of any illegal activity.</p>
+                <p>No real money is involved in playing this game. No real transactions take place. No real financial risk is incurred.</p>
+                <p><strong>Players must be aware that real-world trading and investing carry significant financial risk. Always consult a qualified financial advisor before making investment decisions.</strong></p>
+            </div>
+            <button class="btn btn-primary btn-full modal-close">I UNDERSTAND</button>
+        </div>
+    </div>
+
+    <div id="privacy-modal" class="modal">
+        <div class="modal-content modal-wide legal-modal">
+            <h2>PRIVACY POLICY</h2>
+            <div class="legal-text">
+                <p><strong>Last updated: March 2026</strong></p>
+
+                <h3>What We Collect</h3>
+                <p>Silicon Hustle does not collect, store, or transmit any personal data to any server. The game runs entirely in your browser.</p>
+
+                <h3>Local Storage</h3>
+                <p>The game uses your browser's local storage (not cookies) to save:</p>
+                <ul>
+                    <li><strong>Game save data</strong> — your current game progress</li>
+                    <li><strong>High scores</strong> — names and scores you choose to save</li>
+                    <li><strong>Achievements</strong> — which achievements you have unlocked</li>
+                </ul>
+                <p>This data never leaves your device. It is not transmitted to any server, third party, or analytics service. You can clear this data at any time through your browser settings.</p>
+
+                <h3>Cloudflare</h3>
+                <p>This site is served through Cloudflare, which may set essential cookies for security and performance (such as bot detection and load balancing). These are strictly necessary for the site to function and do not track you. See <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">Cloudflare's Privacy Policy</a> for details.</p>
+
+                <h3>Analytics</h3>
+                <p>If Cloudflare Web Analytics is enabled, it collects anonymous, aggregated usage data (page views, country, browser type) without using cookies or collecting personal information. No individual users are identified or tracked.</p>
+
+                <h3>Children's Privacy</h3>
+                <p>This game is not directed at children under 13. We do not knowingly collect any information from children.</p>
+
+                <h3>Your Rights</h3>
+                <p>Under GDPR, CCPA, and similar regulations, you have the right to:</p>
+                <ul>
+                    <li><strong>Access</strong> your data — all game data is stored locally in your browser and is fully accessible to you</li>
+                    <li><strong>Delete</strong> your data — clear your browser's local storage or use your browser's "Clear site data" function</li>
+                    <li><strong>Portability</strong> — your data is stored as standard JSON in your browser's local storage</li>
+                </ul>
+                <p>Since no personal data is transmitted to or stored on our servers, there is no server-side data to request, modify, or delete.</p>
+
+                <h3>Contact</h3>
+                <p>For privacy-related questions, contact <a href="https://fouts.dev" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">Zachary Fouts</a>.</p>
+            </div>
+            <button class="btn btn-primary btn-full modal-close">CLOSE</button>
+        </div>
+    </div>
+
+    <div id="terms-modal" class="modal">
+        <div class="modal-content modal-wide legal-modal">
+            <h2>TERMS OF USE</h2>
+            <div class="legal-text">
+                <p><strong>Last updated: March 2026</strong></p>
+
+                <h3>Acceptance</h3>
+                <p>By using this game, you agree to these terms. If you do not agree, please do not use the game.</p>
+
+                <h3>Description of Service</h3>
+                <p>Silicon Hustle is a free, browser-based video game provided as-is for entertainment purposes. No account registration is required. No real money or real assets are involved.</p>
+
+                <h3>Fictional Content</h3>
+                <p>All game content is fictional. Asset names, prices, characters, events, cities, and scenarios do not represent real entities. The game is not a simulation of real financial markets and should not be used as a basis for real-world financial decisions.</p>
+
+                <h3>No Financial Advice</h3>
+                <p>Nothing in this game constitutes financial advice, investment advice, trading advice, or any other sort of professional advice. The game mechanics are designed for entertainment, not education or simulation of real markets.</p>
+
+                <h3>Age Requirement</h3>
+                <p>This game is intended for users aged 13 and older. The game contains fictional references to debt, loan sharking, and illicit trading as gameplay mechanics.</p>
+
+                <h3>Intellectual Property</h3>
+                <p>Silicon Hustle is created by <a href="https://fouts.dev" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">Zachary Fouts</a> and released under the <a href="https://github.com/zfouts/SiliconHustle/blob/main/LICENSE" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">MIT License</a>. Source code is available on <a href="https://github.com/zfouts/SiliconHustle" target="_blank" rel="noopener noreferrer" style="color:var(--accent)">GitHub</a>.</p>
+
+                <h3>Limitation of Liability</h3>
+                <p>The game is provided "as is" without warranties of any kind. Zachary Fouts is not liable for any damages arising from use of the game, including but not limited to loss of saved game data.</p>
+
+                <h3>Modifications</h3>
+                <p>These terms may be updated at any time. Continued use of the game constitutes acceptance of any changes.</p>
+
+                <h3>Governing Law</h3>
+                <p>These terms are governed by applicable law in the jurisdiction of the site operator.</p>
+            </div>
+            <button class="btn btn-primary btn-full modal-close">CLOSE</button>
+        </div>
+    </div>
+
+        <!-- Footer -->
+        <div id="site-footer" class="site-footer">
+            <span class="footer-text">&copy; 2026 <a href="https://fouts.dev" target="_blank" rel="noopener noreferrer" class="footer-link" style="text-decoration:none">Zachary Fouts</a>. Silicon Hustle is a fictional game. Not financial advice. <a href="https://github.com/zfouts/SiliconHustle" target="_blank" rel="noopener noreferrer" class="footer-link">Source</a></span>
+            <div class="footer-links">
+                <button class="footer-link" id="footer-disclaimer">Disclaimer</button>
+                <button class="footer-link" id="footer-privacy">Privacy Policy</button>
+                <button class="footer-link" id="footer-terms">Terms of Use</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
