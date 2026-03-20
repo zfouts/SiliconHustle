@@ -25,8 +25,8 @@ export function triggerRandomEvent() {
     switch (event.type) {
         case 'spike':
             if (affectedAsset) {
-                // Each city gets a slightly different multiplier to create price differentials
                 getGameCities().forEach((_, ci) => {
+                    if (!state.prices[ci]?.[affectedAsset.id]) return;
                     const m = event.mult[0] + Math.random() * (event.mult[1] - event.mult[0]);
                     state.prices[ci][affectedAsset.id] = Math.min(MAX_PRICE, Math.round(state.prices[ci][affectedAsset.id] * m));
                 });
@@ -35,6 +35,7 @@ export function triggerRandomEvent() {
         case 'crash':
             if (affectedAsset) {
                 getGameCities().forEach((_, ci) => {
+                    if (!state.prices[ci]?.[affectedAsset.id]) return;
                     const m = event.mult[0] + Math.random() * (event.mult[1] - event.mult[0]);
                     state.prices[ci][affectedAsset.id] = Math.max(Math.round(state.prices[ci][affectedAsset.id] * m), 1);
                 });
@@ -62,12 +63,10 @@ export function triggerRandomEvent() {
             text = text.replace('{stolen}', s).replace('{asset}', t.name); break;
         }
         case 'market_boom':
-            // Was 1.5-2.0x — now 1.15-1.4x per asset (still impactful across 10 assets)
-            ASSETS.forEach(a => getGameCities().forEach((_, ci) => { state.prices[ci][a.id] = Math.min(MAX_PRICE, Math.round(state.prices[ci][a.id] * (1.15 + Math.random() * 0.25))); }));
+            ASSETS.forEach(a => getGameCities().forEach((_, ci) => { if (state.prices[ci]?.[a.id]) state.prices[ci][a.id] = Math.min(MAX_PRICE, Math.round(state.prices[ci][a.id] * (1.15 + Math.random() * 0.25))); }));
             break;
         case 'market_crash':
-            // Was 0.3-0.6x — now 0.55-0.8x per asset
-            ASSETS.forEach(a => getGameCities().forEach((_, ci) => { state.prices[ci][a.id] = Math.max(Math.round(state.prices[ci][a.id] * (0.55 + Math.random() * 0.25)), 1); }));
+            ASSETS.forEach(a => getGameCities().forEach((_, ci) => { if (state.prices[ci]?.[a.id]) state.prices[ci][a.id] = Math.max(Math.round(state.prices[ci][a.id] * (0.55 + Math.random() * 0.25)), 1); }));
             break;
         case 'storage_up': state.maxStorage += 25; break;
         case 'tip': break;

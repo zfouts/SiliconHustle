@@ -98,11 +98,11 @@ function validateSave(s) {
     if (typeof s.maxStorage === 'number') s.maxStorage = Math.max(1, Math.min(10000, s.maxStorage));
 
     // Range bounds on financial / counter fields to prevent overflow and cheating
-    if (typeof s.cash === 'number') s.cash = Math.max(0, Math.min(100_000_000, s.cash));
+    if (typeof s.cash === 'number') s.cash = Math.max(0, Math.min(Number.MAX_SAFE_INTEGER, s.cash));
     if (typeof s.debt === 'number') s.debt = Math.max(0, Math.min(10_000_000, s.debt));
     if (typeof s.interestRate === 'number') s.interestRate = Math.max(0, Math.min(1, s.interestRate));
-    if (typeof s.totalProfit === 'number') s.totalProfit = Math.max(0, Math.min(100_000_000, s.totalProfit));
-    if (typeof s.totalLoss === 'number') s.totalLoss = Math.max(0, Math.min(100_000_000, s.totalLoss));
+    if (typeof s.totalProfit === 'number') s.totalProfit = Math.max(0, Math.min(Number.MAX_SAFE_INTEGER, s.totalProfit));
+    if (typeof s.totalLoss === 'number') s.totalLoss = Math.max(0, Math.min(Number.MAX_SAFE_INTEGER, s.totalLoss));
     if (typeof s.totalTradesMade === 'number') s.totalTradesMade = Math.max(0, Math.min(100_000, s.totalTradesMade));
     if (typeof s.completedMissionCount === 'number') s.completedMissionCount = Math.max(0, Math.min(1000, s.completedMissionCount));
     if (typeof s.muggingImmunity === 'number') s.muggingImmunity = Math.max(0, Math.min(100, s.muggingImmunity));
@@ -110,11 +110,11 @@ function validateSave(s) {
     if (typeof s.tradeStreak === 'number') s.tradeStreak = Math.max(0, Math.min(1000, s.tradeStreak));
     if (typeof s.bestStreak === 'number') s.bestStreak = Math.max(0, Math.min(1000, s.bestStreak));
     if (typeof s.cycleDaysLeft === 'number') s.cycleDaysLeft = Math.max(0, Math.min(30, s.cycleDaysLeft));
-    if (typeof s.bullProfits === 'number') s.bullProfits = Math.max(0, Math.min(100_000_000, s.bullProfits));
+    if (typeof s.bullProfits === 'number') s.bullProfits = Math.max(0, Math.min(Number.MAX_SAFE_INTEGER, s.bullProfits));
     if (typeof s.rumorsActedOn === 'number') s.rumorsActedOn = Math.max(0, Math.min(1000, s.rumorsActedOn));
     if (typeof s.bountyDays === 'number') s.bountyDays = Math.max(0, Math.min(100, s.bountyDays));
     if (typeof s.bountiesCollected === 'number') s.bountiesCollected = Math.max(0, Math.min(1000, s.bountiesCollected));
-    if (typeof s.dividendsEarned === 'number') s.dividendsEarned = Math.max(0, Math.min(100_000_000, s.dividendsEarned));
+    if (typeof s.dividendsEarned === 'number') s.dividendsEarned = Math.max(0, Math.min(Number.MAX_SAFE_INTEGER, s.dividendsEarned));
     if (typeof s.luckyTrades === 'number') s.luckyTrades = Math.max(0, Math.min(100_000, s.luckyTrades));
     if (typeof s.manipulationsCount === 'number') s.manipulationsCount = Math.max(0, Math.min(100_000, s.manipulationsCount));
     if (typeof s.smuggleCount === 'number') s.smuggleCount = Math.max(0, Math.min(100_000, s.smuggleCount));

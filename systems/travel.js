@@ -251,11 +251,12 @@ function travelTo(cityIndex, updateUI, endGameFn) {
 
         const freeFlight = hasPerk('fast_travel') && Math.random() < 0.5;
         if (freeFlight) {
-            addLog('Private jet! No day or fare cost.', 'event-good');
+            addLog('Private jet! Free flight, no airfare cost.', 'event-good');
         } else {
             state.cash = Math.max(0, state.cash - fare);
-            advanceDay(endGameFn);
         }
+        // Always advance the day when traveling (free flight only saves the fare)
+        advanceDay(endGameFn);
 
         addLog(`Arrived in ${getGameCities()[cityIndex].name}. (-$${freeFlight ? '0' : fare.toLocaleString()})`, 'event-info');
         updateUI();

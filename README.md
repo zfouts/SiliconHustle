@@ -154,7 +154,7 @@ Side quests offered when you travel -- up to 2 active at once:
 | VPN Shield | $4,000 | Heat decays 2x faster |
 | Insider Info | $2,500 | Price trend predictions in travel menu |
 | Cloud Storage | $2,000 | +75 storage capacity |
-| Private Jet | $5,000 | 50% chance travel costs no day or airfare |
+| Private Jet | $5,000 | 50% chance airfare is free when traveling |
 | Tax Lawyer | $3,500 | Halve loan interest rate |
 | Bodyguard | $3,000 | Immune to mugging |
 | Market Maker | $4,500 | Supply/demand impact -50% |

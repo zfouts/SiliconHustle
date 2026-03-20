@@ -194,32 +194,31 @@ export function advanceDay(endGameFn) {
     if (Math.random() < 0.25) {
         const gameCitiesForFlash = getGameCities();
         const flashCity = Math.floor(Math.random() * gameCitiesForFlash.length);
-        const flashTypes = ['sale', 'boom', 'crackdown'];
-        const flashType = flashTypes[Math.floor(Math.random() * flashTypes.length)];
-        state.flashEvent = { cityIndex: flashCity, type: flashType };
-        const cityName = gameCitiesForFlash[flashCity]?.name || 'Unknown';
-        if (flashType === 'sale') {
-            // Flash sale: all prices -25% in that city
-            ASSETS.forEach(a => {
-                state.prices[flashCity][a.id] = Math.max(1, Math.round(state.prices[flashCity][a.id] * 0.75));
-            });
-            addLog(`FLASH SALE in ${cityName}! All prices -25% today!`, 'event-good');
-        } else if (flashType === 'boom') {
-            // Tech boom: all prices +30% in that city
-            ASSETS.forEach(a => {
-                state.prices[flashCity][a.id] = Math.min(MAX_PRICE, Math.round(state.prices[flashCity][a.id] * 1.3));
-            });
-            addLog(`TECH BOOM in ${cityName}! All prices +30% today!`, 'event-good');
-        } else {
-            // Crackdown: contraband prices crash, heat +10 if you're there
-            ASSETS.filter(a => a.category === 'contraband').forEach(a => {
-                state.prices[flashCity][a.id] = Math.max(1, Math.round(state.prices[flashCity][a.id] * 0.5));
-            });
-            if (flashCity === state.currentCity) {
-                state.heat = Math.min(100, state.heat + 10);
-                addLog(`POLICE CRACKDOWN here! Contraband prices crashed. +10 heat!`, 'event-bad');
+        if (state.prices[flashCity]) {
+            const flashTypes = ['sale', 'boom', 'crackdown'];
+            const flashType = flashTypes[Math.floor(Math.random() * flashTypes.length)];
+            state.flashEvent = { cityIndex: flashCity, type: flashType };
+            const cityName = gameCitiesForFlash[flashCity]?.name || 'Unknown';
+            if (flashType === 'sale') {
+                ASSETS.forEach(a => {
+                    if (state.prices[flashCity][a.id]) state.prices[flashCity][a.id] = Math.max(1, Math.round(state.prices[flashCity][a.id] * 0.75));
+                });
+                addLog(`FLASH SALE in ${cityName}! All prices -25% today!`, 'event-good');
+            } else if (flashType === 'boom') {
+                ASSETS.forEach(a => {
+                    if (state.prices[flashCity][a.id]) state.prices[flashCity][a.id] = Math.min(MAX_PRICE, Math.round(state.prices[flashCity][a.id] * 1.3));
+                });
+                addLog(`TECH BOOM in ${cityName}! All prices +30% today!`, 'event-good');
             } else {
-                addLog(`POLICE CRACKDOWN in ${cityName}! Contraband prices crashed there.`, 'event-warning');
+                ASSETS.filter(a => a.category === 'contraband').forEach(a => {
+                    if (state.prices[flashCity][a.id]) state.prices[flashCity][a.id] = Math.max(1, Math.round(state.prices[flashCity][a.id] * 0.5));
+                });
+                if (flashCity === state.currentCity) {
+                    state.heat = Math.min(100, state.heat + 10);
+                    addLog(`POLICE CRACKDOWN here! Contraband prices crashed. +10 heat!`, 'event-bad');
+                } else {
+                    addLog(`POLICE CRACKDOWN in ${cityName}! Contraband prices crashed there.`, 'event-warning');
+                }
             }
         }
     }

@@ -158,7 +158,7 @@ export const PERKS = [
     { id: 'vpn_shield',    name: 'VPN Shield',    cost: 4000, icon: '🛡️', desc: 'Heat decays 2x faster' },
     { id: 'insider_info',  name: 'Insider Info',  cost: 2500, icon: '📡', desc: 'See price predictions in travel menu' },
     { id: 'extra_storage', name: 'Cloud Storage', cost: 2000, icon: '☁️', desc: '+75 storage capacity' },
-    { id: 'fast_travel',   name: 'Private Jet',   cost: 5000, icon: '✈️', desc: '50% chance travel is free (no day or airfare cost)' },
+    { id: 'fast_travel',   name: 'Private Jet',   cost: 5000, icon: '✈️', desc: '50% chance airfare is free when traveling' },
     { id: 'tax_lawyer',    name: 'Tax Lawyer',    cost: 3500, icon: '⚖️', desc: 'Halve loan interest rate' },
     { id: 'bodyguard',     name: 'Bodyguard',     cost: 3000, icon: '💪', desc: 'Immune to mugging events' },
     { id: 'market_maker',  name: 'Market Maker',  cost: 4500, icon: '📈', desc: 'Supply/demand impact reduced by 50%' },
