@@ -14,6 +14,8 @@ import { initMatrixRain, stopMatrixRain, startMatrixRain } from './ui/matrix.js'
 import { updateUI, endGame } from './ui/hud.js';
 import { openAssetDetail } from './ui/market.js';
 import { renderLeaderboardModal } from './systems/leaderboard.js';
+import { advanceDay } from './systems/day.js';
+import { addLog, autoSave } from './systems/state.js';
 
 let selectedDifficulty = 'normal';
 
@@ -105,6 +107,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Game actions
     document.getElementById('travel-btn').addEventListener('click', () => openTravel(updateUI, endGame));
+    document.getElementById('wait-btn').addEventListener('click', () => {
+        addLog('You lay low for the day.', 'event-info');
+        advanceDay(endGame);
+        updateUI();
+        autoSave();
+    });
     document.getElementById('bank-btn').addEventListener('click', openBank);
     document.getElementById('perks-btn').addEventListener('click', openPerks);
     document.getElementById('upgrade-btn').addEventListener('click', () => upgradeStorage(updateUI));
@@ -177,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 't' || e.key === 'T') openTravel(updateUI, endGame);
             if (e.key === 'l' || e.key === 'L') openBank();
             if (e.key === 'p' || e.key === 'P') openPerks();
+            if (e.key === 'w' || e.key === 'W') { addLog('You lay low for the day.', 'event-info'); advanceDay(endGame); updateUI(); autoSave(); }
         }
     });
 });
