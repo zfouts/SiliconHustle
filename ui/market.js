@@ -1,5 +1,5 @@
-import { ASSETS, CITIES } from '../data/constants.js';
-import { state, currentTab } from '../systems/state.js';
+import { ASSETS } from '../data/constants.js';
+import { state, currentTab, getGameCities } from '../systems/state.js';
 import { drawSparkline, drawDetailChart } from './charts.js';
 import { showModal } from './screens.js';
 import { AudioEngine } from '../systems/audio.js';
@@ -118,10 +118,10 @@ export function openAssetDetail(assetId) {
         addDetailRow('Signal', `${sig.signal} — ${sig.reason}`, sig.signal === 'BUY' ? '#00e676' : sig.signal === 'SELL' ? '#ff1744' : '');
     }
 
-    const allCityData = CITIES.map((_, i) => [...state.priceHistory[i][assetId], state.prices[i][assetId]]);
+    const allCityData = getGameCities().map((_, i) => [...state.priceHistory[i][assetId], state.prices[i][assetId]]);
     setTimeout(() => drawDetailChart(document.getElementById('detail-chart'), allCityData, ci), 50);
 
-    const cityPrices = CITIES.map((c, i) => ({ name: c.name, price: state.prices[i][assetId], idx: i }));
+    const cityPrices = getGameCities().map((c, i) => ({ name: c.name, price: state.prices[i][assetId], idx: i }));
     const cheapest = Math.min(...cityPrices.map(c => c.price));
     const priciest = Math.max(...cityPrices.map(c => c.price));
 
@@ -166,18 +166,22 @@ export function openAssetDetail(assetId) {
 
 // Compute global average price for an asset across all cities
 function getGlobalPrice(assetId) {
+    const cities = getGameCities();
+    if (cities.length === 0) return 0;
     let total = 0;
-    CITIES.forEach((_, ci) => { total += (state.prices[ci]?.[assetId] || 0); });
-    return Math.round(total / CITIES.length);
+    cities.forEach((_, ci) => { total += (state.prices[ci]?.[assetId] || 0); });
+    return Math.round(total / cities.length);
 }
 
 // Compute global price history (average across cities per day)
 function getGlobalHistory(assetId) {
-    const maxLen = Math.max(...CITIES.map((_, ci) => (state.priceHistory[ci]?.[assetId]?.length || 0)));
+    const cities = getGameCities();
+    if (cities.length === 0) return [];
+    const maxLen = Math.max(0, ...cities.map((_, ci) => (state.priceHistory[ci]?.[assetId]?.length || 0)));
     const result = [];
     for (let d = 0; d < maxLen; d++) {
         let sum = 0, count = 0;
-        CITIES.forEach((_, ci) => {
+        getGameCities().forEach((_, ci) => {
             const h = state.priceHistory[ci]?.[assetId];
             if (h && d < h.length) { sum += h[d]; count++; }
         });
@@ -238,7 +242,7 @@ export function renderMarketTable() {
             thead.innerHTML = '<th>Asset</th><th>Local</th><th>Global Avg</th><th>Spread</th><th>Owned</th><th>Actions</th><th></th>';
         }
     } else {
-        document.getElementById('market-city-name').textContent = `-- ${CITIES[ci]?.name || ''}`;
+        document.getElementById('market-city-name').textContent = `-- ${getGameCities()[ci]?.name || ''}`;
         thead.innerHTML = '<th>Asset</th><th>Price</th><th>7d Chart</th><th>Trend</th><th>Owned</th><th>P&L</th><th>Actions</th>';
     }
 
@@ -326,13 +330,16 @@ export function renderMarketTable() {
 
             // Build deal tag as DOM element instead of HTML string
             let dealTagEl = null;
-            if (hasAI) {
+            const isVolatile = state.volatileAssets?.[asset.id] > 0;
+            if (isVolatile) {
+                dealTagEl = mkSpan('VOLATILE', 'deal-tag volatile');
+            } else if (hasAI) {
                 const globalPrice = getGlobalPrice(asset.id);
                 const arbPct = globalPrice > 0 ? ((localPrice - globalPrice) / globalPrice * 100) : 0;
                 if (arbPct <= -15) dealTagEl = mkSpan('CHEAP vs GLOBAL', 'deal-tag cheap');
                 else if (arbPct >= 15) dealTagEl = mkSpan('PRICEY vs GLOBAL', 'deal-tag expensive');
             }
-            if (!dealTagEl) {
+            if (!dealTagEl && !isVolatile) {
                 if (vsAvg <= -30) dealTagEl = mkSpan('DEAL', 'deal-tag cheap');
                 else if (vsAvg >= 40) dealTagEl = mkSpan('PEAK', 'deal-tag expensive');
             }

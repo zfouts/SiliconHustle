@@ -1,5 +1,5 @@
-import { ASSETS, CITIES, DIFFICULTY, ACHIEVEMENTS } from '../data/constants.js';
-import { state, calcNetWorth, calcAssetValue, usedStorage, autoSave } from '../systems/state.js';
+import { ASSETS, DIFFICULTY, ACHIEVEMENTS } from '../data/constants.js';
+import { state, calcNetWorth, calcAssetValue, usedStorage, autoSave, getGameCities } from '../systems/state.js';
 import { drawSparkline, drawFinalNetworthChart } from './charts.js';
 import { renderMarketTable } from './market.js';
 import { renderLog } from './log.js';
@@ -40,7 +40,7 @@ export function updateUI() {
 
     document.getElementById('hud-day').textContent = state.day;
     document.getElementById('hud-max-days').textContent = state.unlimited ? '\u221E' : state.maxDays;
-    document.getElementById('hud-city').textContent = CITIES[state.currentCity].name;
+    document.getElementById('hud-city').textContent = getGameCities()[state.currentCity]?.name || '';
     animateHudValue('hud-storage', `${usedStorage()}/${state.maxStorage}`);
 
     // Day progress bar
@@ -63,15 +63,53 @@ export function updateUI() {
 
     document.getElementById('heat-bar-fill').style.width = state.heat + '%';
     const hl = document.getElementById('hud-heat');
-    if (state.heat >= 80) { hl.textContent = 'WANTED'; hl.className = 'hud-value heat-wanted'; }
+    if (state.heat >= 80) {
+        const bountyText = state.bountyDays > 0 ? ` (${state.bountyDays}/5)` : '';
+        hl.textContent = 'WANTED' + bountyText;
+        hl.className = 'hud-value heat-wanted';
+    }
     else if (state.heat >= 50) { hl.textContent = 'HOT'; hl.className = 'hud-value heat-hot'; }
     else if (state.heat >= 25) { hl.textContent = 'WARM'; hl.className = 'hud-value heat-warm'; }
     else { hl.textContent = 'COOL'; hl.className = 'hud-value heat-cool'; }
+
+    // Market cycle indicator
+    const cycleEl = document.getElementById('hud-cycle');
+    if (cycleEl) {
+        const cycleLabels = { bull: 'BULL', bear: 'BEAR', neutral: 'NEUTRAL' };
+        const cycleColors = { bull: '#00e676', bear: '#ff1744', neutral: '#aaa' };
+        cycleEl.textContent = cycleLabels[state.marketCycle] || 'NEUTRAL';
+        cycleEl.style.color = cycleColors[state.marketCycle] || '#aaa';
+    }
+
+    // Trade streak indicator
+    const streakEl = document.getElementById('hud-streak');
+    if (streakEl) {
+        if (state.tradeStreak >= 2) {
+            streakEl.textContent = `${state.tradeStreak}x`;
+            streakEl.style.color = state.tradeStreak >= 5 ? '#ffd700' : '#00e676';
+            streakEl.parentElement.style.display = '';
+        } else {
+            streakEl.parentElement.style.display = 'none';
+        }
+    }
 
     const nwCanvas = document.getElementById('networth-spark');
     if (nwCanvas && state.networthHistory.length >= 2) {
         const d = state.networthHistory;
         drawSparkline(nwCanvas, d, d[d.length - 1] >= d[0] ? '#00e676' : '#ff1744');
+    }
+
+    // Insurance button label
+    const insureLabel = document.getElementById('insure-btn-label');
+    if (insureLabel) {
+        if (state.hasInsurance) {
+            insureLabel.textContent = 'INSURED';
+            insureLabel.parentElement.classList.add('btn-insured');
+        } else {
+            const cost = 1000 + Math.floor(Object.values(state.inventory).reduce((s, q) => s + q, 0) * 20);
+            insureLabel.textContent = `BUY INSURANCE ($${cost.toLocaleString()})`;
+            insureLabel.parentElement.classList.remove('btn-insured');
+        }
     }
 
     // Update loan shark button — show availability based on current city
@@ -137,6 +175,10 @@ export function endGame(reason) {
     addStatRow(statsEl, 'Debt', `-$${state.debt.toLocaleString()}`, 'negative', '');
     addStatRow(statsEl, 'Trades', `${state.totalTradesMade}`, '', '');
     addStatRow(statsEl, 'Missions Done', `${state.completedMissionCount}`, '', '');
+    if (state.bestStreak >= 3) addStatRow(statsEl, 'Best Streak', `${state.bestStreak}x`, 'positive', '');
+    if (state.dividendsEarned > 0) addStatRow(statsEl, 'Dividends', `$${state.dividendsEarned.toLocaleString()}`, 'positive', '');
+    if (state.bountiesCollected > 0) addStatRow(statsEl, 'Bounties', `${state.bountiesCollected}`, 'positive', '');
+    if (state.luckyTrades > 0) addStatRow(statsEl, 'Lucky Trades', `${state.luckyTrades}`, 'positive', '');
     addStatRow(statsEl, 'Profit', `$${state.totalProfit.toLocaleString()}`, 'positive', '');
     addStatRow(statsEl, 'Loss', `$${state.totalLoss.toLocaleString()}`, 'negative', '');
     addStatRow(statsEl, 'NET WORTH', `$${netWorth.toLocaleString()}`, netWorth >= 0 ? 'positive' : 'negative', '', 'border-top:2px solid var(--accent);margin-top:0.5rem;padding-top:0.5rem;');

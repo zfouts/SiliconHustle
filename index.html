@@ -81,6 +81,7 @@
                     <ul>
                         <li><strong>Buy low, sell high</strong> -- prices vary between cities</li>
                         <li><strong>Travel</strong> between cities (costs 1 day + airfare based on distance)</li>
+                        <li>Each game features <strong>8 cities</strong> drawn from a pool of 14 -- some rotate!</li>
                         <li><strong>Click asset names</strong> to see cross-city price comparison</li>
                         <li><strong>Pay off your debt</strong> -- interest compounds daily!</li>
                     </ul>
@@ -100,15 +101,94 @@
                         <li>Random <strong>choice events</strong> with risk/reward decisions</li>
                         <li>Shady deals, mysterious strangers, and opportunities</li>
                     </ul>
+                    <h3>MARKET CYCLES</h3>
+                    <ul>
+                        <li>Markets shift between <strong>BULL</strong>, <strong>BEAR</strong>, and <strong>NEUTRAL</strong> phases</li>
+                        <li><strong>Bull markets</strong> push prices up -- great for selling</li>
+                        <li><strong>Bear markets</strong> push prices down -- great for buying</li>
+                        <li>Cycles last 3-7 days. Watch the MARKET indicator in the HUD</li>
+                    </ul>
+                    <h3>TRADE STREAKS</h3>
+                    <ul>
+                        <li>Consecutive <strong>profitable sells</strong> build a trade streak</li>
+                        <li>At 3+ streak, earn <strong>escalating cash bonuses</strong></li>
+                        <li>Selling at a loss <strong>resets your streak</strong></li>
+                    </ul>
+                    <h3>VOLATILE ASSETS</h3>
+                    <ul>
+                        <li>Random assets enter <strong>VOLATILE</strong> mode for a few days</li>
+                        <li>Volatile assets have <strong>2x price swings</strong> -- high risk, high reward</li>
+                        <li>Marked with a <strong>pulsing yellow tag</strong> in the market table</li>
+                    </ul>
+                    <h3>RUMORS &amp; EXPLORATION</h3>
+                    <ul>
+                        <li>You may hear <strong>rumors</strong> about upcoming price changes in other cities</li>
+                        <li>Travel to that city before the rumor fires to capitalize</li>
+                        <li>Visiting a <strong>new city</strong> for the first time earns a cash bonus</li>
+                    </ul>
+                    <h3>WANTED BOUNTY</h3>
+                    <ul>
+                        <li>At <strong>80+ heat</strong>, a bounty timer starts (shown in HUD)</li>
+                        <li>Survive <strong>5 days</strong> at WANTED level to collect a <strong>$3,000-$8,000 reward</strong></li>
+                        <li>Getting <strong>raided during a bounty</strong> deals double penalties and resets progress</li>
+                    </ul>
+                    <h3>DIVIDENDS</h3>
+                    <ul>
+                        <li>Assets held for <strong>3+ days</strong> generate <strong>daily passive income</strong></li>
+                        <li>Different categories pay different rates (Data &amp; Services pay best)</li>
+                        <li>Contraband earns nothing -- too hot to stake</li>
+                    </ul>
+                    <h3>LUCKY TRADES</h3>
+                    <ul>
+                        <li><strong>8% chance</strong> on any trade to get lucky</li>
+                        <li>Lucky buys get a <strong>15% discount</strong>, lucky sells get a <strong>15% premium</strong></li>
+                    </ul>
                     <h3>HEAT &amp; CONTRABAND</h3>
                     <ul>
                         <li>Trading <strong>ZeroDayExploits</strong> raises your heat level</li>
                         <li>High heat = feds can <strong>raid you</strong></li>
                         <li>Buy <strong>insurance</strong> or the <strong>VPN Shield</strong> perk for protection</li>
                     </ul>
+                    <h3>MARKET MANIPULATION</h3>
+                    <ul>
+                        <li>Spend <strong>$2,000</strong> to <strong>pump or crash</strong> any asset's price by 25-40%</li>
+                        <li>Adds <strong>15 heat</strong> -- risky but powerful for setting up trades</li>
+                        <li>Buy low, pump, sell high -- classic pump and dump</li>
+                    </ul>
+                    <h3>CARGO INSURANCE</h3>
+                    <ul>
+                        <li>Buy insurance to <strong>block the next raid</strong> entirely</li>
+                        <li>Cost scales with your inventory size ($1,000 base + $20/unit)</li>
+                        <li>Consumed on use -- buy again for continued protection</li>
+                    </ul>
+                    <h3>CITY CONTACTS</h3>
+                    <ul>
+                        <li><strong>15% chance</strong> when arriving in a city to make a local contact</li>
+                        <li>Contacts give a <strong>10% buy discount</strong> in that city for 4-7 days</li>
+                        <li>Stacks with Bulk Buyer perk for maximum savings</li>
+                    </ul>
+                    <h3>RIVAL TRADER</h3>
+                    <ul>
+                        <li>A <strong>rival NPC</strong> moves between cities and trades daily</li>
+                        <li>Their trades affect <strong>supply and demand</strong> -- prices shift where they trade</li>
+                        <li>Their location is shown in the <strong>travel menu</strong></li>
+                    </ul>
+                    <h3>SMUGGLING ROUTES</h3>
+                    <ul>
+                        <li>Each game has <strong>3 underground routes</strong> between city pairs</li>
+                        <li>Traveling a smuggling route <strong>reduces heat by 30%</strong></li>
+                        <li>Routes shown with a purple indicator in the travel menu</li>
+                    </ul>
+                    <h3>FLASH EVENTS</h3>
+                    <ul>
+                        <li>Daily chance of a <strong>city-specific event</strong>: Flash Sale, Tech Boom, or Crackdown</li>
+                        <li><strong>Flash Sale</strong>: all prices -25% (great for buying)</li>
+                        <li><strong>Tech Boom</strong>: all prices +30% (great for selling)</li>
+                        <li><strong>Crackdown</strong>: contraband prices crash, +10 heat if you're there</li>
+                    </ul>
                     <h3>KEYBOARD SHORTCUTS</h3>
                     <ul>
-                        <li><strong>T</strong> Travel | <strong>W</strong> Wait | <strong>L</strong> Loan Shark | <strong>P</strong> Perks | <strong>Esc</strong> Close</li>
+                        <li><strong>T</strong> Travel | <strong>W</strong> Wait | <strong>L</strong> Loan Shark | <strong>P</strong> Perks | <strong>M</strong> Manipulate | <strong>Esc</strong> Close</li>
                     </ul>
                 </div>
                 <button id="help-back-btn" class="btn btn-secondary">BACK</button>
@@ -175,6 +255,14 @@
                         <span id="hud-heat" class="hud-value heat-cool">COOL</span>
                     </div>
                     <div class="hud-item">
+                        <span class="hud-label">MARKET</span>
+                        <span id="hud-cycle" class="hud-value">NEUTRAL</span>
+                    </div>
+                    <div class="hud-item" style="display:none">
+                        <span class="hud-label">STREAK</span>
+                        <span id="hud-streak" class="hud-value">0x</span>
+                    </div>
+                    <div class="hud-item">
                         <span class="hud-label">TREND</span>
                         <canvas id="networth-spark" width="80" height="28"></canvas>
                     </div>
@@ -209,6 +297,8 @@
                         <button id="bank-btn" class="btn btn-secondary btn-full"><span class="btn-icon">&#9760;</span> <span id="bank-btn-label">LOAN SHARK [L]</span></button>
                         <button id="perks-btn" class="btn btn-secondary btn-full"><span class="btn-icon">&#9733;</span> PERK SHOP [P]</button>
                         <button id="upgrade-btn" class="btn btn-secondary btn-full"><span class="btn-icon">&#9650;</span> UPGRADE STORAGE ($1,500)</button>
+                        <button id="manipulate-btn" class="btn btn-secondary btn-full"><span class="btn-icon">&#9881;</span> MANIPULATE [M]</button>
+                        <button id="insure-btn" class="btn btn-secondary btn-full"><span class="btn-icon">&#9730;</span> <span id="insure-btn-label">BUY INSURANCE</span></button>
                         <button id="stash-btn" class="btn btn-secondary btn-full"><span class="btn-icon">&#9888;</span> DUMP ALL</button>
                         <button id="retire-btn" class="btn btn-danger btn-full" style="display:none"><span class="btn-icon">&#9873;</span> RETIRE / END GAME</button>
                     </div>
@@ -309,6 +399,16 @@
                 <h3 class="detail-section-title">PRICES ACROSS ALL CITIES</h3>
                 <div id="detail-cities" class="detail-cities"></div>
                 <button class="btn btn-secondary btn-full modal-close">CLOSE</button>
+            </div>
+        </div>
+
+        <!-- Market Manipulation Modal -->
+        <div id="manipulate-modal" class="modal">
+            <div class="modal-content">
+                <h2>MANIPULATE MARKET</h2>
+                <p class="modal-subtitle">Pick an asset to pump or crash in this city. Costs $2,000 + 15 heat.</p>
+                <div id="manipulate-list"></div>
+                <button class="btn btn-secondary btn-full modal-close">CANCEL</button>
             </div>
         </div>
 

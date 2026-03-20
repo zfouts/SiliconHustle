@@ -1,5 +1,5 @@
-import { ASSETS, CITIES, EVENTS } from '../data/constants.js';
-import { state, addLog } from './state.js';
+import { ASSETS, EVENTS } from '../data/constants.js';
+import { state, addLog, getGameCities } from './state.js';
 import { AudioEngine } from './audio.js';
 import { showModal } from '../ui/screens.js';
 import { checkAchievement } from './achievements.js';
@@ -18,15 +18,15 @@ export function triggerRandomEvent() {
         text = text.replace('{asset}', affectedAsset.name);
     }
     if (text.includes('{city}')) {
-        const oc = CITIES.filter((_, i) => i !== state.currentCity);
-        text = text.replace('{city}', oc[Math.floor(Math.random() * oc.length)].name);
+        const oc = getGameCities().filter((_, i) => i !== state.currentCity);
+        text = text.replace('{city}', oc.length > 0 ? oc[Math.floor(Math.random() * oc.length)].name : 'another city');
     }
 
     switch (event.type) {
         case 'spike':
             if (affectedAsset) {
                 // Each city gets a slightly different multiplier to create price differentials
-                CITIES.forEach((_, ci) => {
+                getGameCities().forEach((_, ci) => {
                     const m = event.mult[0] + Math.random() * (event.mult[1] - event.mult[0]);
                     state.prices[ci][affectedAsset.id] = Math.min(MAX_PRICE, Math.round(state.prices[ci][affectedAsset.id] * m));
                 });
@@ -34,7 +34,7 @@ export function triggerRandomEvent() {
             break;
         case 'crash':
             if (affectedAsset) {
-                CITIES.forEach((_, ci) => {
+                getGameCities().forEach((_, ci) => {
                     const m = event.mult[0] + Math.random() * (event.mult[1] - event.mult[0]);
                     state.prices[ci][affectedAsset.id] = Math.max(Math.round(state.prices[ci][affectedAsset.id] * m), 1);
                 });
@@ -63,11 +63,11 @@ export function triggerRandomEvent() {
         }
         case 'market_boom':
             // Was 1.5-2.0x — now 1.15-1.4x per asset (still impactful across 10 assets)
-            ASSETS.forEach(a => CITIES.forEach((_, ci) => { state.prices[ci][a.id] = Math.min(MAX_PRICE, Math.round(state.prices[ci][a.id] * (1.15 + Math.random() * 0.25))); }));
+            ASSETS.forEach(a => getGameCities().forEach((_, ci) => { state.prices[ci][a.id] = Math.min(MAX_PRICE, Math.round(state.prices[ci][a.id] * (1.15 + Math.random() * 0.25))); }));
             break;
         case 'market_crash':
             // Was 0.3-0.6x — now 0.55-0.8x per asset
-            ASSETS.forEach(a => CITIES.forEach((_, ci) => { state.prices[ci][a.id] = Math.max(Math.round(state.prices[ci][a.id] * (0.55 + Math.random() * 0.25)), 1); }));
+            ASSETS.forEach(a => getGameCities().forEach((_, ci) => { state.prices[ci][a.id] = Math.max(Math.round(state.prices[ci][a.id] * (0.55 + Math.random() * 0.25)), 1); }));
             break;
         case 'storage_up': state.maxStorage += 25; break;
         case 'tip': break;
@@ -83,25 +83,49 @@ export function triggerRandomEvent() {
 }
 
 export function triggerRaid() {
+    // Insurance blocks the raid entirely
+    if (state.hasInsurance) {
+        state.hasInsurance = false;
+        state.heat = Math.max(0, state.heat - 15);
+        state.survivedRaid = true;
+        checkAchievement('survivor');
+        checkAchievement('insured');
+        const text = 'The feds tried to raid you, but your insurance lawyers shut it down! Insurance consumed.';
+        AudioEngine.play('event_good');
+        document.getElementById('event-icon').textContent = '🛡️';
+        document.getElementById('event-title').textContent = 'INSURED!';
+        document.getElementById('event-text').textContent = text;
+        showModal('event-modal');
+        addLog('🛡️ ' + text, 'event-good');
+        return;
+    }
+
+    // Double damage if bounty is active (surviving at WANTED heat level)
+    const bountyActive = state.bountyDays > 0;
+    const seizeRate = bountyActive ? [0.35, 0.5] : [0.2, 0.3];
+    const fineRate = bountyActive ? [0.2, 0.3] : [0.1, 0.2];
+
     let confiscated = 0;
     ASSETS.forEach(a => {
         if (state.inventory[a.id] > 0) {
-            const seized = Math.ceil(state.inventory[a.id] * (0.2 + Math.random() * 0.3));
+            const seized = Math.ceil(state.inventory[a.id] * (seizeRate[0] + Math.random() * (seizeRate[1] - seizeRate[0])));
             state.inventory[a.id] -= seized;
             if (state.inventory[a.id] === 0) { state.costBasis[a.id] = 0; state.holdingSince[a.id] = 0; }
             confiscated += seized;
         }
     });
-    const fine = Math.min(Math.round(state.cash * (0.1 + Math.random() * 0.2)), state.cash);
+    const fine = Math.min(Math.round(state.cash * (fineRate[0] + Math.random() * (fineRate[1] - fineRate[0]))), state.cash);
     state.cash -= fine;
     state.heat = Math.max(0, state.heat - 30);
     state.survivedRaid = true;
+    if (bountyActive) state.bountyDays = 0;
     checkAchievement('survivor');
 
-    const text = `The feds raided you! Confiscated ${confiscated} items and fined you $${fine.toLocaleString()}!`;
+    const bountyNote = bountyActive ? ' BOUNTY RAID — double penalties!' : '';
+    const text = `The feds raided you! Confiscated ${confiscated} items and fined you $${fine.toLocaleString()}!${bountyNote}`;
     AudioEngine.play('event_bad');
     document.getElementById('event-icon').textContent = '🚔';
-    document.getElementById('event-title').textContent = 'BUSTED!';
+    document.getElementById('event-title').textContent = bountyActive ? 'BOUNTY BUST!' : 'BUSTED!';
     document.getElementById('event-text').textContent = text;
     showModal('event-modal');
     addLog('🚔 ' + text, 'event-bad');

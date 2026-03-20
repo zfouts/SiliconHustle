@@ -1,5 +1,5 @@
-import { ASSETS, CITIES } from '../data/constants.js';
-import { state } from './state.js';
+import { ASSETS } from '../data/constants.js';
+import { state, getGameCities } from './state.js';
 import { hasPerk } from './perks.js';
 
 // Cap at 50x the most expensive base price (ZeroDayExploit=$6000 -> $300,000 max)
@@ -13,13 +13,19 @@ export function generatePrice(asset, city) {
 }
 
 export function regeneratePrices() {
-    CITIES.forEach((city, ci) => {
+    getGameCities().forEach((city, ci) => {
         ASSETS.forEach(asset => {
             const current = state.prices[ci][asset.id];
             const fairValue = asset.basePrice * (city.priceMod[asset.category] || 1);
 
-            // Random drift — proportional to price but dampened
-            const drift = current * asset.volatility * (Math.random() * 2 - 1) * 0.3;
+            // Market cycle bias
+            const cycleBias = state.marketCycle === 'bull' ? 0.15 : state.marketCycle === 'bear' ? -0.15 : 0;
+
+            // Volatile asset multiplier (2x swings when volatile)
+            const volMult = (state.volatileAssets?.[asset.id] > 0) ? 2.0 : 1.0;
+
+            // Random drift — proportional to price but dampened, with cycle bias and volatility multiplier
+            const drift = current * asset.volatility * (Math.random() * 2 - 1 + cycleBias) * 0.3 * volMult;
 
             // Mean reversion — stronger the further from fair value
             // Uses percentage deviation so it scales properly at any price level
@@ -44,7 +50,7 @@ export function regeneratePrices() {
 }
 
 export function snapshotPrices() {
-    CITIES.forEach((_, ci) => {
+    getGameCities().forEach((_, ci) => {
         ASSETS.forEach(asset => {
             const arr = state.priceHistory[ci][asset.id];
             arr.push(state.prices[ci][asset.id]);

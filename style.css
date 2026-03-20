@@ -345,6 +345,12 @@ body {
     border-color: var(--red);
 }
 
+.btn-insured {
+    background: rgba(0, 230, 118, 0.15);
+    border-color: var(--green);
+    color: var(--green);
+}
+
 .btn-danger:hover {
     box-shadow: 0 4px 20px rgba(255, 23, 68, 0.3);
 }
@@ -848,6 +854,18 @@ body {
     background: var(--red-dim);
     color: var(--red);
     border: 1px solid var(--red);
+}
+
+.deal-tag.volatile {
+    background: rgba(255, 234, 0, 0.15);
+    color: #ffea00;
+    border: 1px solid #ffea00;
+    animation: volatile-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes volatile-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
 }
 
 /* ===== ASSET DETAIL MODAL ===== */

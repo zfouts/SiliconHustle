@@ -1,5 +1,5 @@
-import { CITIES, STORAGE_UPGRADE_COST, STORAGE_UPGRADE_AMOUNT } from '../data/constants.js';
-import { state, addLog, autoSave } from './state.js';
+import { STORAGE_UPGRADE_COST, STORAGE_UPGRADE_AMOUNT } from '../data/constants.js';
+import { state, addLog, autoSave, getGameCities } from './state.js';
 import { AudioEngine } from './audio.js';
 import { showModal, closeModals } from '../ui/screens.js';
 import { showToast } from '../ui/toast.js';
@@ -10,7 +10,7 @@ export function isLoanSharkCity(cityIdx) {
 }
 
 export function getLoanSharkCityNames() {
-    return (state.loanSharkCities || []).map(i => CITIES[i]?.name).filter(Boolean);
+    return (state.loanSharkCities || []).map(i => getGameCities()[i]?.name).filter(Boolean);
 }
 
 export function openBank() {

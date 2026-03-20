@@ -6,6 +6,7 @@ import { state, initGame, loadSave, checkForResume, setSelectedDifficulty, setCu
 import { openTravel } from './systems/travel.js';
 import { openBank, repayDebt, repayAll, borrowCash, upgradeStorage } from './systems/bank.js';
 import { openBuy, openSell, executeTrade, updateTradeTotal, dumpAll, currentTrade, getEffectivePrice } from './systems/trading.js';
+import { openManipulate } from './systems/manipulation.js';
 import { showAchievements } from './systems/achievements.js';
 import { showHighScores } from './systems/scores.js';
 import { openPerks } from './systems/perks.js';
@@ -116,6 +117,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('bank-btn').addEventListener('click', openBank);
     document.getElementById('perks-btn').addEventListener('click', openPerks);
     document.getElementById('upgrade-btn').addEventListener('click', () => upgradeStorage(updateUI));
+    document.getElementById('manipulate-btn').addEventListener('click', () => openManipulate(updateUI));
+    document.getElementById('insure-btn').addEventListener('click', () => {
+        if (state.hasInsurance) { import('./ui/toast.js').then(m => m.showToast('Already insured!', 'info')); return; }
+        const totalQty = Math.max(0, Object.values(state.inventory).reduce((s, q) => s + Math.max(0, q), 0));
+        const cost = Math.min(50000, 1000 + Math.floor(totalQty * 20));
+        if (state.cash < cost) { import('./ui/toast.js').then(m => m.showToast(`Insurance costs $${cost.toLocaleString()}. Not enough cash.`, 'bad')); return; }
+        state.cash -= cost;
+        state.hasInsurance = true;
+        import('./systems/audio.js').then(m => m.AudioEngine.play('buy'));
+        import('./ui/toast.js').then(m => m.showToast(`Insured! Next raid blocked. -$${cost.toLocaleString()}`, 'good'));
+        addLog(`Bought cargo insurance for $${cost.toLocaleString()}. Next raid will be blocked.`, 'event-good');
+        updateUI();
+        autoSave();
+    });
     document.getElementById('stash-btn').addEventListener('click', () => dumpAll(updateUI));
     document.getElementById('retire-btn')?.addEventListener('click', () => {
         if (confirm('Are you sure you want to retire and end the game?')) {
@@ -185,6 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.key === 't' || e.key === 'T') openTravel(updateUI, endGame);
             if (e.key === 'l' || e.key === 'L') openBank();
             if (e.key === 'p' || e.key === 'P') openPerks();
+            if (e.key === 'm' || e.key === 'M') openManipulate(updateUI);
             if (e.key === 'w' || e.key === 'W') { addLog('You lay low for the day.', 'event-info'); advanceDay(endGame); updateUI(); autoSave(); }
         }
     });

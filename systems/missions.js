@@ -1,5 +1,5 @@
-import { ASSETS, CITIES, MISSION_TEMPLATES } from '../data/constants.js';
-import { state, addLog, autoSave } from './state.js';
+import { ASSETS, MISSION_TEMPLATES } from '../data/constants.js';
+import { state, addLog, autoSave, getGameCities } from './state.js';
 import { AudioEngine } from './audio.js';
 import { showToast } from '../ui/toast.js';
 import { checkAchievement } from './achievements.js';
@@ -20,13 +20,15 @@ export function generateMission() {
     const mission = { id, type: template.type, reward, progress: 0, target: 0, desc: '', completed: false, failed: false, deadline: state.day + 8 + Math.floor(Math.random() * 7) };
 
     const randomAsset = ASSETS[Math.floor(Math.random() * ASSETS.length)];
-    const randomCity = CITIES[Math.floor(Math.random() * CITIES.length)];
+    const gameCities = getGameCities();
+    const randomCityIdx = Math.floor(Math.random() * gameCities.length);
+    const randomCity = gameCities[randomCityIdx];
 
     switch (template.type) {
         case 'deliver':
             mission.target = 3 + Math.floor(Math.random() * 8);
             mission.assetId = randomAsset.id;
-            mission.cityIdx = CITIES.indexOf(randomCity);
+            mission.cityIdx = randomCityIdx;
             mission.desc = `Deliver ${mission.target} ${randomAsset.name} to ${randomCity.name}`;
             break;
         case 'profit':

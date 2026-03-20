@@ -1,5 +1,5 @@
-import { ASSETS, CITIES } from '../data/constants.js';
-import { state, freeStorage } from './state.js';
+import { ASSETS } from '../data/constants.js';
+import { state, freeStorage, getGameCities } from './state.js';
 import { hasPerk } from './perks.js';
 import { isLoanSharkCity } from './bank.js';
 import { getTravelFare } from './travel.js';
@@ -64,7 +64,7 @@ export function renderAIBot() {
     // Summary
     const summary = document.createElement('div');
     summary.className = 'ai-summary';
-    summary.textContent = `Analyzing ${ASSETS.length} assets across ${CITIES.length} cities`;
+    summary.textContent = `Analyzing ${ASSETS.length} assets across ${getGameCities().length} cities`;
     container.appendChild(summary);
 }
 
@@ -83,12 +83,12 @@ function generateRecommendations() {
         let globalTotal = 0;
         let bestSellPrice = 0;
         let bestSellCity = '';
-        CITIES.forEach((city, i) => {
+        getGameCities().forEach((city, i) => {
             const p = state.prices[i]?.[asset.id] || 0;
             globalTotal += p;
             if (p > bestSellPrice) { bestSellPrice = p; bestSellCity = city.name; }
         });
-        const globalAvg = Math.round(globalTotal / CITIES.length);
+        const globalAvg = Math.round(globalTotal / getGameCities().length);
 
         // Arbitrage: buy here, sell in best city
         const spread = bestSellPrice - localPrice;
@@ -139,12 +139,12 @@ function generateRecommendations() {
         let bestSellPrice = 0;
         let bestSellCity = '';
         let bestSellCityIdx = ci;
-        CITIES.forEach((city, i) => {
+        getGameCities().forEach((city, i) => {
             const p = state.prices[i]?.[asset.id] || 0;
             globalTotal += p;
             if (p > bestSellPrice) { bestSellPrice = p; bestSellCity = city.name; bestSellCityIdx = i; }
         });
-        const globalAvg = Math.round(globalTotal / CITIES.length);
+        const globalAvg = Math.round(globalTotal / getGameCities().length);
 
         // Sell here if local price is 10%+ above global (overpriced)
         if (localPrice > globalAvg * 1.1 && avgCost > 0) {
@@ -215,8 +215,8 @@ function generateRecommendations() {
                 const localPrice = state.prices[ci]?.[asset.id] || 0;
                 if (localPrice <= 0 || localPrice > cash) return;
                 let globalTotal = 0;
-                CITIES.forEach((_, i) => { globalTotal += (state.prices[i]?.[asset.id] || 0); });
-                const globalAvg = Math.round(globalTotal / CITIES.length);
+                getGameCities().forEach((_, i) => { globalTotal += (state.prices[i]?.[asset.id] || 0); });
+                const globalAvg = Math.round(globalTotal / getGameCities().length);
                 const discount = globalAvg > 0 ? ((globalAvg - localPrice) / globalAvg * 100) : 0;
                 if (discount > bestDealPct) { bestDealPct = discount; bestDeal = asset; }
             });
@@ -247,11 +247,13 @@ function generateRecommendations() {
 }
 
 function getGlobalHistoryQuick(assetId) {
-    const maxLen = Math.max(...CITIES.map((_, ci) => (state.priceHistory[ci]?.[assetId]?.length || 0)));
+    const cities = getGameCities();
+    if (cities.length === 0) return [];
+    const maxLen = Math.max(0, ...cities.map((_, ci) => (state.priceHistory[ci]?.[assetId]?.length || 0)));
     const result = [];
     for (let d = Math.max(0, maxLen - 10); d < maxLen; d++) {
         let sum = 0, count = 0;
-        CITIES.forEach((_, ci) => {
+        getGameCities().forEach((_, ci) => {
             const h = state.priceHistory[ci]?.[assetId];
             if (h && d < h.length) { sum += h[d]; count++; }
         });

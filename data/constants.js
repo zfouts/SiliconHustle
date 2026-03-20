@@ -8,21 +8,40 @@ export const ASSETS = [
     { id: 'gpu',    name: 'GPU Rigs',       icon: '🎮', basePrice: 2200,  volatility: 0.3,  category: 'hardware' },
     { id: 'data',   name: 'DataSets',       icon: '📊', basePrice: 350,   volatility: 0.4,  category: 'data' },
     { id: 'zero',   name: 'ZeroDayExploit', icon: '💀', basePrice: 6000,  volatility: 0.8,  category: 'contraband' },
+    { id: 'creds',  name: 'StolenCreds',    icon: '🔑', basePrice: 180,   volatility: 0.9,  category: 'contraband' },
+    { id: 'ransom', name: 'RansomKit',      icon: '🦠', basePrice: 8500,  volatility: 1.0,  category: 'contraband' },
     { id: 'ai',     name: 'AI Models',      icon: '🤖', basePrice: 3000,  volatility: 0.55, category: 'software' },
     { id: 'domain', name: 'PremiumDomains', icon: '🌐', basePrice: 600,   volatility: 0.45, category: 'digital' },
     { id: 'vpn',    name: 'VPN Accounts',   icon: '🔒', basePrice: 120,   volatility: 0.7,  category: 'service' },
 ];
 
-export const CITIES = [
-    { id: 'sf',      name: 'San Francisco', vibe: 'VC money flows freely',       specialty: 'Cheap: Hardware | Pricey: Crypto, Software', priceMod: { crypto: 1.2, hardware: 0.9, software: 1.3 }, coords: [37.77, -122.42] },
-    { id: 'austin',  name: 'Austin',        vibe: 'Crypto bros paradise',         specialty: 'Cheap: Crypto | Pricey: Hardware, NFTs',     priceMod: { crypto: 0.8, hardware: 1.1, nft: 1.3 },     coords: [30.27, -97.74] },
-    { id: 'nyc',     name: 'New York',      vibe: 'Wall Street meets Web3',       specialty: 'Cheap: Services | Pricey: Data, Crypto',     priceMod: { data: 1.3, crypto: 1.1, service: 0.8 },     coords: [40.71, -74.01] },
-    { id: 'miami',   name: 'Miami',         vibe: 'Offshore vibes',               specialty: 'Cheap: Contraband | Pricey: NFTs',           priceMod: { crypto: 0.9, contraband: 0.7, nft: 1.2 },   coords: [25.76, -80.19] },
-    { id: 'seattle', name: 'Seattle',       vibe: 'Big tech backyard',            specialty: 'Cheap: Software, Hardware | Pricey: Data',    priceMod: { software: 0.7, hardware: 0.8, data: 1.1 },   coords: [47.61, -122.33] },
-    { id: 'berlin',  name: 'Berlin',        vibe: 'Underground hacker scene',     specialty: 'Cheap: Services, Contraband',                priceMod: { contraband: 0.8, service: 0.7, crypto: 0.9 }, coords: [52.52, 13.40] },
-    { id: 'tokyo',   name: 'Tokyo',         vibe: 'Cutting edge tech market',     specialty: 'Cheap: Hardware | Pricey: Digital, Software', priceMod: { hardware: 0.7, software: 1.1, digital: 1.3 }, coords: [35.68, 139.69] },
-    { id: 'lagos',   name: 'Lagos',         vibe: "Africa's booming tech hub",    specialty: 'Cheap: Data, Digital | Pricey: Services',     priceMod: { service: 1.3, data: 0.7, digital: 0.8 },     coords: [6.52, 3.38] },
+// Heat per unit for contraband items (default 5 if not listed)
+export const CONTRABAND_HEAT = { zero: 5, creds: 3, ransom: 8 };
+
+// Full city pool — each game selects a subset
+export const ALL_CITIES = [
+    { id: 'sf',        name: 'San Francisco', vibe: 'VC money flows freely',        specialty: 'Cheap: Hardware | Pricey: Crypto, Software',  priceMod: { crypto: 1.2, hardware: 0.9, software: 1.3 },  coords: [37.77, -122.42] },
+    { id: 'austin',    name: 'Austin',        vibe: 'Crypto bros paradise',          specialty: 'Cheap: Crypto | Pricey: Hardware, NFTs',      priceMod: { crypto: 0.8, hardware: 1.1, nft: 1.3 },      coords: [30.27, -97.74] },
+    { id: 'nyc',       name: 'New York',      vibe: 'Wall Street meets Web3',        specialty: 'Cheap: Services | Pricey: Data, Crypto',      priceMod: { data: 1.3, crypto: 1.1, service: 0.8 },      coords: [40.71, -74.01] },
+    { id: 'miami',     name: 'Miami',         vibe: 'Offshore vibes',                specialty: 'Cheap: Contraband | Pricey: NFTs',            priceMod: { crypto: 0.9, contraband: 0.7, nft: 1.2 },    coords: [25.76, -80.19] },
+    { id: 'seattle',   name: 'Seattle',       vibe: 'Big tech backyard',             specialty: 'Cheap: Software, Hardware | Pricey: Data',     priceMod: { software: 0.7, hardware: 0.8, data: 1.1 },    coords: [47.61, -122.33] },
+    { id: 'berlin',    name: 'Berlin',        vibe: 'Underground hacker scene',      specialty: 'Cheap: Services, Contraband',                 priceMod: { contraband: 0.8, service: 0.7, crypto: 0.9 }, coords: [52.52, 13.40] },
+    { id: 'tokyo',     name: 'Tokyo',         vibe: 'Cutting edge tech market',      specialty: 'Cheap: Hardware | Pricey: Digital, Software',  priceMod: { hardware: 0.7, software: 1.1, digital: 1.3 }, coords: [35.68, 139.69] },
+    { id: 'lagos',     name: 'Lagos',         vibe: "Africa's booming tech hub",     specialty: 'Cheap: Data, Digital | Pricey: Services',      priceMod: { service: 1.3, data: 0.7, digital: 0.8 },     coords: [6.52, 3.38] },
+    { id: 'shenzhen',  name: 'Shenzhen',      vibe: 'Hardware factory of the world', specialty: 'Cheap: Hardware | Pricey: Software, Data',     priceMod: { hardware: 0.6, software: 1.2, data: 1.2 },   coords: [22.54, 114.06] },
+    { id: 'dubai',     name: 'Dubai',         vibe: 'Crypto tax haven, zero chill',  specialty: 'Cheap: Contraband | Pricey: NFTs, Digital',    priceMod: { contraband: 0.65, nft: 1.3, digital: 1.2 },  coords: [25.20, 55.27] },
+    { id: 'singapore', name: 'Singapore',     vibe: 'Fintech regulatory paradise',   specialty: 'Cheap: Digital, Services | Pricey: Crypto',    priceMod: { digital: 0.75, service: 0.8, crypto: 1.15 },  coords: [1.35, 103.82] },
+    { id: 'bangalore', name: 'Bangalore',     vibe: "India's Silicon Valley",        specialty: 'Cheap: Software, Services | Pricey: Hardware', priceMod: { software: 0.6, service: 0.65, hardware: 1.3 }, coords: [12.97, 77.59] },
+    { id: 'telaviv',   name: 'Tel Aviv',      vibe: 'Cybersecurity capital',         specialty: 'Cheap: Contraband, Data | Pricey: Hardware',   priceMod: { contraband: 0.75, data: 0.8, hardware: 1.2 }, coords: [32.09, 34.78] },
+    { id: 'london',    name: 'London',        vibe: 'Old money meets Web3',          specialty: 'Cheap: Crypto | Pricey: NFTs, Data',           priceMod: { crypto: 0.85, nft: 1.3, data: 1.2 },         coords: [51.51, -0.13] },
 ];
+
+// Cities always present in every game
+export const FIXED_CITY_IDS = ['sf', 'nyc', 'tokyo'];
+export const GAME_CITY_COUNT = 8;
+
+// Legacy export for backward compat — DO NOT USE in game logic, use getGameCities() from state.js
+export const CITIES = ALL_CITIES;
 
 export const EVENTS = [
     // Spikes: 1.3x–2.2x range (was 1.5x–5x — way too extreme)
@@ -108,7 +127,7 @@ export const ACHIEVEMENTS = [
     { id: 'net_50k',       name: 'Baller',           icon: '💎', desc: 'Reach $50,000 net worth' },
     { id: 'net_100k',      name: 'Legend',           icon: '👑', desc: 'Reach $100,000 net worth' },
     { id: 'deal_hunter',   name: 'Deal Hunter',      icon: '🎯', desc: 'Buy an asset marked DEAL' },
-    { id: 'globe_trotter', name: 'Globe Trotter',    icon: '🌍', desc: 'Visit all 8 cities' },
+    { id: 'globe_trotter', name: 'Globe Trotter',    icon: '🌍', desc: 'Visit every city on the map' },
     { id: 'contraband',    name: 'Dark Net',         icon: '💀', desc: 'Buy 10+ ZeroDayExploits' },
     { id: 'survivor',      name: 'Survivor',         icon: '🛡️', desc: 'Survive a fed raid' },
     { id: 'whale',         name: 'Whale',            icon: '🐋', desc: 'Hold $50,000+ in assets' },
@@ -122,6 +141,16 @@ export const ACHIEVEMENTS = [
     { id: 'paper_hands',  name: 'Paper Hands',      icon: '🧻', desc: 'Sell at a loss 5 times' },
     { id: 'hodler',       name: 'HODL Gang',        icon: '💎', desc: 'End the game holding 8+ asset types' },
     { id: 'wiped_out',   name: 'Rock Bottom',      icon: '🪦', desc: 'Get wiped out (go completely broke)' },
+    { id: 'hot_streak',  name: 'Hot Streak',       icon: '🔥', desc: '5 consecutive profitable trades' },
+    { id: 'bull_rider',  name: 'Bull Rider',       icon: '🐂', desc: 'Earn $10,000+ profit during a bull market' },
+    { id: 'explorer',    name: 'Explorer',         icon: '🧭', desc: 'Visit 5 different cities' },
+    { id: 'chaos_trader',name: 'Chaos Trader',     icon: '⚡', desc: 'Profit from selling a volatile asset' },
+    { id: 'bounty_hunter',name: 'Bounty Hunter',   icon: '🎯', desc: 'Collect 3 wanted bounties' },
+    { id: 'passive_income',name: 'Passive Income', icon: '💤', desc: 'Earn $5,000+ in asset dividends' },
+    { id: 'lucky_trader',name: 'Lucky Trader',     icon: '🍀', desc: 'Get 5 lucky trades' },
+    { id: 'market_manipulator', name: 'Puppet Master', icon: '🎭', desc: 'Manipulate the market 5 times' },
+    { id: 'insured',    name: 'Better Safe',      icon: '🛡️', desc: 'Block a raid with insurance' },
+    { id: 'smuggler',   name: 'Smuggler',         icon: '🛤️', desc: 'Use a smuggling route 3 times' },
 ];
 
 export const PERKS = [
